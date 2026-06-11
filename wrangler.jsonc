@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "google-bron-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-11",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  // Eén route per host. De Worker injecteert alleen op pagina's met een
+  // <article class="single"> en alleen voor hosts die in src/sites.ts staan;
+  // overige requests (assets, admin, API, onbekende hosts) gaan ongewijzigd door.
+  // Een nieuwe site toevoegen: hier een route + in src/sites.ts een config-entry.
+  "routes": [
+    { "pattern": "resport.nl/*", "zone_name": "resport.nl" },
+    { "pattern": "culy.nl/*", "zone_name": "culy.nl" },
+    { "pattern": "www.culy.nl/*", "zone_name": "culy.nl" }
+  ]
+}

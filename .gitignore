@@ -1,0 +1,12 @@
+node_modules/
+.wrangler/
+dist/
+.dev.vars
+*.log
+.DS_Store
+
+# Lokale scratch-/testbestanden
+.fix-*.html
+.test-worker.mjs
+.test-wrangler.jsonc
+worker-configuration.d.ts
