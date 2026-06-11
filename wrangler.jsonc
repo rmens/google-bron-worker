@@ -7,13 +7,14 @@
     "enabled": true,
     "head_sampling_rate": 1
   },
-  // Eén route per host. De Worker injecteert alleen op pagina's met een
-  // <article class="single"> en alleen voor hosts die in src/sites.ts staan;
-  // overige requests (assets, admin, API, onbekende hosts) gaan ongewijzigd door.
-  // Een nieuwe site toevoegen: hier een route + in src/sites.ts een config-entry.
+  // Eén route per site (canonieke host) + bijbehorende entry in src/sites.ts.
   "routes": [
     { "pattern": "resport.nl/*", "zone_name": "resport.nl" },
-    { "pattern": "culy.nl/*", "zone_name": "culy.nl" },
-    { "pattern": "www.culy.nl/*", "zone_name": "culy.nl" }
+    { "pattern": "www.culy.nl/*", "zone_name": "culy.nl" },
+    { "pattern": "www.metronieuws.nl/*", "zone_name": "metronieuws.nl" },
+    { "pattern": "www.nsmbl.nl/*", "zone_name": "nsmbl.nl" },
+    { "pattern": "www.manners.nl/*", "zone_name": "manners.nl" },
+    { "pattern": "www.jmouders.nl/*", "zone_name": "jmouders.nl" },
+    { "pattern": "www.want.nl/*", "zone_name": "want.nl" }
   ]
 }

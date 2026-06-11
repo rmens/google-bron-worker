@@ -10,3 +10,6 @@ dist/
 .test-worker.mjs
 .test-wrangler.jsonc
 worker-configuration.d.ts
+
+# Playwright MCP scratch
+.playwright-mcp/

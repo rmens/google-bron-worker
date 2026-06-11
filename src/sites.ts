@@ -1,44 +1,73 @@
 // Per-site configuratie. Sleutel = geregistreerd domein zonder "www.".
-// Een nieuwe site toevoegen = hier een entry bijzetten + een route in
-// wrangler.jsonc voor de bijbehorende zone.
+// Nieuwe site = hier een entry + een route in wrangler.jsonc.
 
 export interface SiteConfig {
-  /** Merknaam, gebruikt in de aria-label. */
   name: string;
-  /** Kop van de CTA. */
   heading: string;
-  /** Subtekst onder de kop. */
   subtext: string;
-  /** Tekst op de knop. */
   buttonLabel: string;
   /** Domein voor de Google-voorkeursbron-link (?q=...). */
   googleQuery: string;
-  /** Selector waarná geïnjecteerd wordt; default DEFAULT_SELECTOR. */
-  selector?: string;
+  /** "dark" voor sites met een donkere achtergrond (bijv. Manners). */
+  theme?: "light" | "dark";
 }
 
-// Pad waar de Instellen-knop naartoe linkt; de worker telt de kliks hier en
-// stuurt door naar Google. Het "__"-prefix voorkomt verwarring met een artikel.
+// De Instellen-knop linkt hierheen; het "__"-prefix voorkomt verwarring met een artikel.
 export const CLICK_PATH = "/__google-aanjager/click";
 
-// Alleen het "post"-type, niet andere post-types zoals recepten
-// (die hebben data-type="recipe"). Per site overschrijfbaar via `selector`.
-export const DEFAULT_SELECTOR = 'article.single[data-type="post"] p';
+// Alle directe kinderen van een post-article (niet recepten: data-type="recipe").
+export const BLOCK_SELECTOR = 'article.single[data-type="post"] > *';
 
 export const SITES: Record<string, SiteConfig> = {
   "resport.nl": {
     name: "Resport",
     heading: "Resport altijd op pole position?",
-    subtext: "Eén vinkje en wij staan voortaan eerst in je Google-feed.",
+    subtext: "Eén vinkje en wij staan voortaan helemaal vooraan in je Google-feed.",
     buttonLabel: "Instellen →",
     googleQuery: "resport.nl",
   },
   "culy.nl": {
     name: "Culy",
     heading: "Meer Culy in je Google? 🥐",
-    subtext: "Vink ons aan als voorkeursbron, dan staan onze lekkere recepten altijd vooraan.",
+    subtext: "Vink ons aan als favoriet, dan staan onze lekkere recepten altijd vooraan.",
     buttonLabel: "Instellen →",
     googleQuery: "culy.nl",
+  },
+  "metronieuws.nl": {
+    name: "Metro",
+    heading: "Sneller bij het nieuws dat ertoe doet",
+    subtext: "Stel Metro in als voorkeursbron en je vindt ons nieuws altijd terug in Google.",
+    buttonLabel: "Instellen →",
+    googleQuery: "metronieuws.nl",
+  },
+  "nsmbl.nl": {
+    name: "NSMBL",
+    heading: "Niks van NSMBL missen? 😍",
+    subtext: "Maak ons je Google-favoriet, dan weet jij het zodra het gebeurt.",
+    buttonLabel: "Instellen →",
+    googleQuery: "nsmbl.nl",
+  },
+  "manners.nl": {
+    name: "Manners",
+    heading: "Meer Manners in je Google?",
+    subtext: "Maak ons je voorkeursbron, dan zie je het beste altijd bovenaan.",
+    buttonLabel: "Instellen →",
+    googleQuery: "manners.nl",
+    theme: "dark",
+  },
+  "jmouders.nl": {
+    name: "J/M Ouders",
+    heading: "Meer J/M Ouders in je Google?",
+    subtext: "Vink ons aan als favoriet en mis onze beste verhalen en adviezen niet.",
+    buttonLabel: "Instellen →",
+    googleQuery: "jmouders.nl",
+  },
+  "want.nl": {
+    name: "WANT",
+    heading: "Meer WANT in je feed? ⚡",
+    subtext: "Stel ons in als Google-favoriet, dan staat het laatste technieuws bovenaan.",
+    buttonLabel: "Instellen →",
+    googleQuery: "want.nl",
   },
 };
 
