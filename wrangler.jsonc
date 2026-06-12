@@ -15,6 +15,7 @@
     { "pattern": "www.nsmbl.nl/*", "zone_name": "nsmbl.nl" },
     { "pattern": "www.manners.nl/*", "zone_name": "manners.nl" },
     { "pattern": "www.jmouders.nl/*", "zone_name": "jmouders.nl" },
-    { "pattern": "www.want.nl/*", "zone_name": "want.nl" }
+    { "pattern": "www.want.nl/*", "zone_name": "want.nl" },
+    { "pattern": "www.bedrock.nl/*", "zone_name": "bedrock.nl" }
   ]
 }

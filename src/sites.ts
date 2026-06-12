@@ -69,6 +69,13 @@ export const SITES: Record<string, SiteConfig> = {
     buttonLabel: "Instellen →",
     googleQuery: "want.nl",
   },
+  "bedrock.nl": {
+    name: "BEDROCK",
+    heading: "Meer BEDROCK, minder zoeken",
+    subtext: "Vink ons aan als favoriet in Google, dan staan onze beste verhalen vooraan.",
+    buttonLabel: "Instellen →",
+    googleQuery: "bedrock.nl",
+  },
 };
 
 /** Zoekt de config voor een host op; normaliseert een leidende "www.". */
