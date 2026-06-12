@@ -71,7 +71,7 @@ export const SITES: Record<string, SiteConfig> = {
   },
   "bedrock.nl": {
     name: "BEDROCK",
-    heading: "Meer BEDROCK, minder zoeken",
+    heading: "Meer BEDROCK, minder zoeken 🧘‍♀️",
     subtext: "Vink ons aan als favoriet in Google, dan staan onze beste verhalen vooraan.",
     buttonLabel: "Instellen →",
     googleQuery: "bedrock.nl",
