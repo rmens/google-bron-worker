@@ -10,10 +10,22 @@ export interface SiteConfig {
   googleQuery: string;
   /** "dark" voor sites met een donkere achtergrond (bijv. Manners). */
   theme?: "light" | "dark";
+  /** Indien gezet: 50/50 a/b-test tussen het Google-blok en dit WhatsApp-blok. */
+  whatsapp?: {
+    heading: string;
+    subtext: string;
+    buttonLabel: string;
+    /** Kanaal-URL, bijv. https://whatsapp.com/channel/XXXXXXXX */
+    url: string;
+  };
 }
 
 // De Instellen-knop linkt hierheen; het "__"-prefix voorkomt verwarring met een artikel.
+// Het "google-"-prefix blijft staan: hier hangt de bestaande klikdata aan.
 export const CLICK_PATH = "/__google-aanjager/click";
+
+// Idem voor de Volgen-knop van de WhatsApp-variant, zodat de kliks apart telbaar zijn.
+export const WHATSAPP_CLICK_PATH = "/__aanjager/click-whatsapp";
 
 // Alle directe kinderen van een post-article (niet recepten: data-type="recipe").
 export const BLOCK_SELECTOR = 'article.single[data-type="post"] > *';
@@ -61,6 +73,12 @@ export const SITES: Record<string, SiteConfig> = {
     subtext: "Vink ons aan als favoriet en mis onze beste verhalen en adviezen niet.",
     buttonLabel: "Instellen →",
     googleQuery: "jmouders.nl",
+    whatsapp: {
+      heading: "Volg J/M Ouders op WhatsApp",
+      subtext: "Onze beste verhalen en adviezen, makkelijk in je app.",
+      buttonLabel: "Volgen →",
+      url: "https://whatsapp.com/channel/0029VbDgdmp002TFQyqFTj3W",
+    },
   },
   "want.nl": {
     name: "WANT",

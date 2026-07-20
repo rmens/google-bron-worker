@@ -1,8 +1,10 @@
 # google-bron-worker
 
 Eén Cloudflare Worker die op meerdere Mediahuis-sites (resport.nl, culy.nl, …)
-via `HTMLRewriter` een Google-"voorkeursbron"-CTA injecteert direct ná de eerste
-alinea binnen het `<article class="single">` op artikelpagina's.
+via `HTMLRewriter` een "aanjager"-CTA injecteert direct ná de eerste alinea
+binnen het `<article class="single">` op artikelpagina's. Standaard is dat een
+Google-"voorkeursbron"-blok; sites met een `whatsapp`-config draaien een
+50/50-a/b-test met een "Volg ons op WhatsApp"-blok in dezelfde opmaak.
 
 ## Hoe het werkt
 
@@ -10,8 +12,9 @@ De Worker draait als route vóór de origin van elke geconfigureerde zone:
 
 1. De host wordt opgezocht in [`src/sites.ts`](src/sites.ts) (een leidende
    `www.` wordt genegeerd). Onbekende hosts gaan ongewijzigd door.
-2. Requests op het klikpad (`/__google-aanjager/click`) krijgen een `302` naar
-   de Google-voorkeursbron van die site (zie *Kliks tellen*).
+2. Requests op de klikpaden krijgen een `302`: `/__google-aanjager/click` naar
+   de Google-voorkeursbron van die site, `/__aanjager/click-whatsapp` naar het
+   WhatsApp-kanaal (zie *Kliks tellen*).
 3. Niet-`GET`-requests worden ongewijzigd doorgelaten.
 4. De origin-respons wordt opgehaald. Een subrequest naar dezelfde route
    triggert de Worker niet opnieuw, dus er ontstaat geen loop.
@@ -48,22 +51,44 @@ geladen.
    de config.
 
 Per site zijn de teksten (`heading`, `subtext`, `buttonLabel`) en het
-Google-domein (`googleQuery`) los instelbaar. De CSS en het Google-logo zijn
+Google-domein (`googleQuery`) los instelbaar. De CSS en de logo's zijn
 gedeeld en staan in [`src/injected-block.ts`](src/injected-block.ts).
+
+### A/b-test met een WhatsApp-blok
+
+Geef een site een `whatsapp`-config om het Google-blok per pageview 50/50 af
+te wisselen met een WhatsApp-variant (zelfde opmaak, groene knop en
+WhatsApp-logo). Nu alleen actief op jmouders.nl:
+
+```ts
+whatsapp: {
+  heading: "Volg Voorbeeld op WhatsApp",
+  subtext: "…",
+  buttonLabel: "Volgen →",
+  url: "https://whatsapp.com/channel/…",
+},
+```
+
+Zonder `whatsapp`-config toont een site altijd het Google-blok.
 
 ## Kliks tellen
 
-De Instellen-knop linkt niet rechtstreeks naar Google, maar naar het interne
-pad `/__google-aanjager/click`. De Worker stuurt dat met een `302` door naar
-`https://www.google.com/preferences/source?q=<domein-van-de-site>`. Elke klik is
-zo één HTTP-request op dat pad, dat Cloudflare al meetelt in de zone-/HTTP-
-analytics — geen aparte tracking-infrastructuur nodig. Het `__`-prefix zorgt dat
-het pad nooit met een echt artikel verward wordt.
+De knoppen linken niet rechtstreeks naar buiten, maar naar een intern pad dat
+de Worker met een `302` doorstuurt:
+
+- Google-blok: `/__google-aanjager/click` →
+  `https://www.google.com/preferences/source?q=<domein-van-de-site>`. (Dit pad
+  behoudt zijn oude `google-`-naam: hier hangt de bestaande klikdata aan.)
+- WhatsApp-blok: `/__aanjager/click-whatsapp` → de kanaal-URL uit de config.
+
+Elke klik is zo één HTTP-request op dat pad, dat Cloudflare al meetelt in de
+zone-/HTTP-analytics — geen aparte tracking-infrastructuur nodig. Het
+`__`-prefix zorgt dat het pad nooit met een echt artikel verward wordt.
 
 Aantal kliks opvragen via de [GraphQL Analytics
 API](https://developers.cloudflare.com/analytics/graphql-api/) — filter
-`httpRequestsAdaptiveGroups` op `clientRequestPath = "/__google-aanjager/click"`
-en `clientRequestHTTPHost` op de site. Let op: deze dataset is adaptief gesampled
+`httpRequestsAdaptiveGroups` op `clientRequestPath` (een van de twee paden
+hierboven) en `clientRequestHTTPHost` op de site. Let op: deze dataset is adaptief gesampled
 en heeft beperkte retentie; voor exacte, langdurige tellingen is Workers
 Analytics Engine of Logpush nauwkeuriger.
 

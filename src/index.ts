@@ -1,5 +1,5 @@
-import { buildInjectedHtml } from "./injected-block";
-import { BLOCK_SELECTOR, CLICK_PATH, lookupSite } from "./sites";
+import { buildInjectedHtml, type Variant } from "./injected-block";
+import { BLOCK_SELECTOR, CLICK_PATH, WHATSAPP_CLICK_PATH, lookupSite } from "./sites";
 
 // Injecteert het blok vóór het eerste element ná de eerste echte alinea, dus
 // niet ónder een kop. Een "In het kort"-samenvatting telt niet als alinea, en
@@ -47,6 +47,12 @@ export default {
       return Response.redirect(destination, 302);
     }
 
+    // Klik op Volgen (WhatsApp-variant): 302 naar het kanaal, apart telbaar.
+    if (url.pathname === WHATSAPP_CLICK_PATH) {
+      if (!site?.whatsapp) return fetch(request);
+      return Response.redirect(site.whatsapp.url, 302);
+    }
+
     if (!site || request.method !== "GET") return fetch(request);
 
     const response = await fetch(request);
@@ -54,10 +60,14 @@ export default {
       return response;
     }
 
+    // A/b: heeft de site een WhatsApp-config, dan wisselen Google en WhatsApp
+    // elkaar per pageview 50/50 af.
+    const variant: Variant = site.whatsapp && Math.random() < 0.5 ? "whatsapp" : "google";
+
     // Bij een fout de pagina nooit breken: serveer dan de origin ongewijzigd.
     try {
       return new HTMLRewriter()
-        .on(BLOCK_SELECTOR, new ParagraphInjector(buildInjectedHtml(site)))
+        .on(BLOCK_SELECTOR, new ParagraphInjector(buildInjectedHtml(site, variant)))
         .transform(response);
     } catch (error) {
       console.error("Injectie overgeslagen voor", url.hostname, error);
