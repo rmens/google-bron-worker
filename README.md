@@ -58,7 +58,7 @@ gedeeld en staan in [`src/injected-block.ts`](src/injected-block.ts).
 
 Geef een site een `whatsapp`-config om het Google-blok per pageview 50/50 af
 te wisselen met een WhatsApp-variant (zelfde opmaak, groene knop en
-WhatsApp-logo). Nu alleen actief op jmouders.nl:
+WhatsApp-logo):
 
 ```ts
 whatsapp: {

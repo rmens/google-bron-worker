@@ -73,12 +73,6 @@ export const SITES: Record<string, SiteConfig> = {
     subtext: "Vink ons aan als favoriet en mis onze beste verhalen en adviezen niet.",
     buttonLabel: "Instellen →",
     googleQuery: "jmouders.nl",
-    whatsapp: {
-      heading: "Volg J/M Ouders op WhatsApp",
-      subtext: "Onze beste verhalen en adviezen, makkelijk in je app.",
-      buttonLabel: "Volgen →",
-      url: "https://whatsapp.com/channel/0029VbDgdmp002TFQyqFTj3W",
-    },
   },
   "want.nl": {
     name: "WANT",
@@ -86,13 +80,6 @@ export const SITES: Record<string, SiteConfig> = {
     subtext: "Stel ons in als Google-favoriet, dan staat het laatste technieuws bovenaan.",
     buttonLabel: "Instellen →",
     googleQuery: "want.nl",
-  },
-  "bedrock.nl": {
-    name: "BEDROCK",
-    heading: "Meer BEDROCK, minder zoeken 🧘‍♀️",
-    subtext: "Vink ons aan als favoriet in Google, dan staan onze beste verhalen vooraan.",
-    buttonLabel: "Instellen →",
-    googleQuery: "bedrock.nl",
   },
 };
 
