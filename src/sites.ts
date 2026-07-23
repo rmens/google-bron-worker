@@ -51,6 +51,12 @@ export const SITES: Record<string, SiteConfig> = {
     subtext: "Stel Metro in als voorkeursbron en je vindt ons nieuws altijd terug in Google.",
     buttonLabel: "Instellen →",
     googleQuery: "metronieuws.nl",
+    whatsapp: {
+      heading: "Metronieuws op WhatsApp",
+      subtext: "De opvallendste nieuwtjes, mooiste verhalen en handigste tips direct in WhatsApp.",
+      buttonLabel: "Volg Metro",
+      url: "https://whatsapp.com/channel/0029VaZVwso84Om3u2Bnqd1m",
+    },
   },
   "nsmbl.nl": {
     name: "NSMBL",
