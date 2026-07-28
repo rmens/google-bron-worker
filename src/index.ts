@@ -1,6 +1,46 @@
 import { buildInjectedHtml, type Variant } from "./injected-block";
 import { BLOCK_SELECTOR, CLICK_PATH, WHATSAPP_CLICK_PATH, lookupSite } from "./sites";
 
+interface InjectionState {
+  bannersHidden: boolean;
+}
+
+// In de huidige datalayer betekent show_banners: 0 dat banners verborgen zijn.
+// Ondersteun ook de expliciete inverse vlag, mocht een site die gebruiken.
+const HIDDEN_BANNERS_PATTERN =
+  /(?:["']?show_banners["']?\s*:\s*(?:0|false|["'](?:0|false)["'])|["']?hide_banners["']?\s*:\s*(?:1|true|["'](?:1|true)["']))(?=\s*[,}])/i;
+const DATALAYER_NAME_PATTERN = /\bdataLayer\b/;
+const DATALAYER_PATTERN_TAIL_LENGTH = 128;
+
+class BannerVisibilityDetector {
+  private tail = "";
+  private dataLayerFound = false;
+  private hiddenBannersFound = false;
+
+  constructor(private readonly state: InjectionState) {}
+
+  element(): void {
+    this.tail = "";
+    this.dataLayerFound = false;
+    this.hiddenBannersFound = false;
+  }
+
+  text(chunk: Text): void {
+    if (this.state.bannersHidden) return;
+
+    const text = this.tail + chunk.text;
+    this.dataLayerFound ||= DATALAYER_NAME_PATTERN.test(text);
+    this.hiddenBannersFound ||= HIDDEN_BANNERS_PATTERN.test(text);
+
+    if (this.dataLayerFound && this.hiddenBannersFound) {
+      this.state.bannersHidden = true;
+      return;
+    }
+
+    this.tail = text.slice(-DATALAYER_PATTERN_TAIL_LENGTH);
+  }
+}
+
 // Injecteert het blok vóór het eerste element ná de eerste echte alinea, dus
 // niet ónder een kop. Een "In het kort"-samenvatting telt niet als alinea, en
 // artikelen met maar één alinea krijgen niets.
@@ -10,10 +50,17 @@ class ParagraphInjector {
   private capturing = false;
   private buffer = "";
 
-  constructor(private readonly html: string) {}
+  constructor(
+    private readonly html: string,
+    private readonly state: InjectionState,
+  ) {}
 
   element(element: Element): void {
     if (this.injected) return;
+    if (this.state.bannersHidden) {
+      this.injected = true;
+      return;
+    }
     if (this.seenParagraph) {
       this.injected = true;
       element.before(this.html, { html: true });
@@ -63,11 +110,16 @@ export default {
     // A/b: heeft de site een WhatsApp-config, dan wisselen Google en WhatsApp
     // elkaar per pageview 50/50 af.
     const variant: Variant = site.whatsapp && Math.random() < 0.5 ? "whatsapp" : "google";
+    const injectionState: InjectionState = { bannersHidden: false };
 
     // Bij een fout de pagina nooit breken: serveer dan de origin ongewijzigd.
     try {
       return new HTMLRewriter()
-        .on(BLOCK_SELECTOR, new ParagraphInjector(buildInjectedHtml(site, variant)))
+        .on("script", new BannerVisibilityDetector(injectionState))
+        .on(
+          BLOCK_SELECTOR,
+          new ParagraphInjector(buildInjectedHtml(site, variant), injectionState),
+        )
         .transform(response);
     } catch (error) {
       console.error("Injectie overgeslagen voor", url.hostname, error);
