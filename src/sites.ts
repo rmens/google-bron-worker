@@ -72,7 +72,7 @@ export const SITES: Record<string, SiteConfig> = {
     googleQuery: "nsmbl.nl",
     whatsapp: {
       heading: "Join NSMBL op WhatsApp 👀",
-      subtext: "Must-read verhalen, exclusieve winacties, kortingscodes en uitnodigingen voor onze events. Op WhatsApp hoor jij het als eerste van onze redactie.",
+      subtext: "Must-reads, winacties en uitnodigingen voor onze events. Op WhatsApp hoor jij het als eerste van ons.",
       buttonLabel: "Volg NSMBL",
       url: "https://whatsapp.com/channel/0029Vb8UXJP4dTnKYrQy590u",
     },
