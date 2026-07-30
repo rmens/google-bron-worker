@@ -70,6 +70,12 @@ export const SITES: Record<string, SiteConfig> = {
     subtext: "Maak ons je Google-favoriet, dan weet jij het zodra het gebeurt.",
     buttonLabel: "Instellen →",
     googleQuery: "nsmbl.nl",
+    whatsapp: {
+      heading: "Join NSMBL op WhatsApp 👀",
+      subtext: "Must-read verhalen, exclusieve winacties, kortingscodes en uitnodigingen voor onze events. Op WhatsApp hoor jij het als eerste van onze redactie.",
+      buttonLabel: "Volg NSMBL",
+      url: "https://whatsapp.com/channel/0029Vb8UXJP4dTnKYrQy590u",
+    },
   },
   "manners.nl": {
     enabled: true,
