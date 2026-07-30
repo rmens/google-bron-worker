@@ -97,7 +97,7 @@ export const SITES: Record<string, SiteConfig> = {
     googleQuery: "want.nl",
     whatsapp: {
       heading: "Niks van WANT missen? ⚡",
-      subtext: "Alles over tech, van tips tot het laatste nieuws. Praat mee op WhatsApp.",
+      subtext: "Alles over tech, van tips tot het laatste nieuws. Volg ons op WhatsApp.",
       buttonLabel: "Volg WANT",
       url: "https://whatsapp.com/channel/0029Va8z27KC1Fu37HCgQH3J",
     },
