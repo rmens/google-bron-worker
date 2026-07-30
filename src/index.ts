@@ -100,7 +100,7 @@ export default {
       return Response.redirect(site.whatsapp.url, 302);
     }
 
-    if (!site || request.method !== "GET") return fetch(request);
+    if (!site?.enabled || request.method !== "GET") return fetch(request);
 
     const response = await fetch(request);
     if (!response.headers.get("content-type")?.includes("text/html")) {

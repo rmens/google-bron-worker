@@ -2,6 +2,8 @@
 // Nieuwe site = hier een entry + een route in wrangler.jsonc.
 
 export interface SiteConfig {
+  /** Hoofdschakelaar voor het CTA-blok; bestaande klikroutes blijven werken. */
+  enabled: boolean;
   name: string;
   heading: string;
   subtext: string;
@@ -32,6 +34,7 @@ export const BLOCK_SELECTOR = 'article.single[data-type="post"] > *';
 
 export const SITES: Record<string, SiteConfig> = {
   "resport.nl": {
+    enabled: true,
     name: "Resport",
     heading: "Resport altijd op pole position?",
     subtext: "Eén vinkje en wij staan voortaan helemaal vooraan in je Google-feed.",
@@ -39,6 +42,7 @@ export const SITES: Record<string, SiteConfig> = {
     googleQuery: "resport.nl",
   },
   "culy.nl": {
+    enabled: true,
     name: "Culy",
     heading: "Meer Culy in je Google? 🥐",
     subtext: "Vink ons aan als favoriet, dan staan onze lekkere recepten altijd vooraan.",
@@ -46,6 +50,7 @@ export const SITES: Record<string, SiteConfig> = {
     googleQuery: "culy.nl",
   },
   "metronieuws.nl": {
+    enabled: true,
     name: "Metro",
     heading: "Sneller bij het nieuws dat ertoe doet",
     subtext: "Stel Metro in als voorkeursbron en je vindt ons nieuws altijd terug in Google.",
@@ -59,6 +64,7 @@ export const SITES: Record<string, SiteConfig> = {
     },
   },
   "nsmbl.nl": {
+    enabled: true,
     name: "NSMBL",
     heading: "Niks van NSMBL missen? 😍",
     subtext: "Maak ons je Google-favoriet, dan weet jij het zodra het gebeurt.",
@@ -66,6 +72,7 @@ export const SITES: Record<string, SiteConfig> = {
     googleQuery: "nsmbl.nl",
   },
   "manners.nl": {
+    enabled: true,
     name: "Manners",
     heading: "Meer Manners in je Google?",
     subtext: "Maak ons je voorkeursbron, dan zie je het beste altijd bovenaan.",
@@ -74,6 +81,7 @@ export const SITES: Record<string, SiteConfig> = {
     theme: "dark",
   },
   "jmouders.nl": {
+    enabled: true,
     name: "J/M Ouders",
     heading: "Meer J/M Ouders in je Google?",
     subtext: "Vink ons aan als favoriet en mis onze beste verhalen en adviezen niet.",
@@ -81,6 +89,7 @@ export const SITES: Record<string, SiteConfig> = {
     googleQuery: "jmouders.nl",
   },
   "want.nl": {
+    enabled: true,
     name: "WANT",
     heading: "Meer WANT in je feed? ⚡",
     subtext: "Stel ons in als Google-favoriet, dan staat het laatste technieuws bovenaan.",
@@ -88,7 +97,7 @@ export const SITES: Record<string, SiteConfig> = {
     googleQuery: "want.nl",
     whatsapp: {
       heading: "Niks van WANT missen? ⚡",
-      subtext: "Alles over tech, handige tips en nieuws waar jij over kunt meepraten.",
+      subtext: "Alles over tech, van tips tot het laatste nieuws. Praat mee op WhatsApp.",
       buttonLabel: "Volg WANT",
       url: "https://whatsapp.com/channel/0029Va8z27KC1Fu37HCgQH3J",
     },
