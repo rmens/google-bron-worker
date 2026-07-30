@@ -86,6 +86,12 @@ export const SITES: Record<string, SiteConfig> = {
     subtext: "Stel ons in als Google-favoriet, dan staat het laatste technieuws bovenaan.",
     buttonLabel: "Instellen →",
     googleQuery: "want.nl",
+    whatsapp: {
+      heading: "Niks van WANT missen? ⚡",
+      subtext: "Alles over tech, handige tips en nieuws waar jij over kunt meepraten.",
+      buttonLabel: "Volg WANT",
+      url: "https://whatsapp.com/channel/0029Va8z27KC1Fu37HCgQH3J",
+    },
   },
 };
 
