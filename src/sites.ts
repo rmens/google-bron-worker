@@ -34,7 +34,7 @@ export const BLOCK_SELECTOR = 'article.single[data-type="post"] > *';
 
 export const SITES: Record<string, SiteConfig> = {
   "resport.nl": {
-    enabled: true,
+    enabled: false,
     name: "Resport",
     heading: "Resport altijd op pole position?",
     subtext: "Eén vinkje en wij staan voortaan helemaal vooraan in je Google-feed.",
@@ -42,7 +42,7 @@ export const SITES: Record<string, SiteConfig> = {
     googleQuery: "resport.nl",
   },
   "culy.nl": {
-    enabled: true,
+    enabled: false,
     name: "Culy",
     heading: "Meer Culy in je Google? 🥐",
     subtext: "Vink ons aan als favoriet, dan staan onze lekkere recepten altijd vooraan.",
@@ -78,7 +78,7 @@ export const SITES: Record<string, SiteConfig> = {
     },
   },
   "manners.nl": {
-    enabled: true,
+    enabled: false,
     name: "Manners",
     heading: "Meer Manners in je Google?",
     subtext: "Maak ons je voorkeursbron, dan zie je het beste altijd bovenaan.",
@@ -87,7 +87,7 @@ export const SITES: Record<string, SiteConfig> = {
     theme: "dark",
   },
   "jmouders.nl": {
-    enabled: true,
+    enabled: false,
     name: "J/M Ouders",
     heading: "Meer J/M Ouders in je Google?",
     subtext: "Vink ons aan als favoriet en mis onze beste verhalen en adviezen niet.",
