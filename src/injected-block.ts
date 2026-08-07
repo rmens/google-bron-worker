@@ -65,10 +65,6 @@ const STYLE = `<style>
 }
 .aanjager-cta .aanjager-newsletter-form .aanjager-btn{
   height:44px !important;min-height:44px;padding-top:0;padding-bottom:0;
-  background:linear-gradient(180deg,#2B88D8,#0F6CBD);
-}
-.aanjager-cta .aanjager-newsletter-form .aanjager-btn:hover{
-  background:linear-gradient(180deg,#2478C2,#0D5FA8);
 }
 .aanjager-cta .aanjager-newsletter-input:focus{outline:2px solid var(--aanjager-brand);outline-offset:1px}
 .aanjager-cta .aanjager-newsletter-status{
