@@ -83,7 +83,7 @@ export const SITES: Record<string, SiteConfig> = {
     // npx wrangler secret put ECHOBOX_METRO_REFRESH_TOKEN.
     newsletter: {
       heading: "Het beste van Metro in je inbox",
-      subtext: "Meld je aan voor onze nieuwsbrief en ontvang tot drie keer per week een selectie van onze mooiste verhalen.",
+      subtext: "Tot drie keer per week onze mooiste verhalen in je mail.",
       buttonLabel: "Schrijf in",
       campaignUrn: "urn:newsletter:campaign:1bd150b3-65ce-408d-834e-eae58e5302db",
       credentialBindingPrefix: "ECHOBOX_METRO",
