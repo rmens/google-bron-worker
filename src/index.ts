@@ -1,5 +1,18 @@
-import { buildInjectedHtml, type Variant } from "./injected-block";
-import { BLOCK_SELECTOR, CLICK_PATH, WHATSAPP_CLICK_PATH, lookupSite } from "./sites";
+import {
+  NEWSLETTER_CLIENT_SCRIPT,
+  buildInjectedHtml,
+  type Variant,
+} from "./injected-block";
+import { handleNewsletterSubscription, type Env } from "./newsletter";
+import {
+  BLOCK_SELECTOR,
+  CLICK_PATH,
+  NEWSLETTER_SCRIPT_PATH,
+  NEWSLETTER_SUBSCRIBE_PATH,
+  WHATSAPP_CLICK_PATH,
+  lookupSite,
+  type SiteConfig,
+} from "./sites";
 
 interface InjectionState {
   bannersHidden: boolean;
@@ -11,6 +24,13 @@ const HIDDEN_BANNERS_PATTERN =
   /(?:["']?show_banners["']?\s*:\s*(?:0|false|["'](?:0|false)["'])|["']?hide_banners["']?\s*:\s*(?:1|true|["'](?:1|true)["']))(?=\s*[,}])/i;
 const DATALAYER_NAME_PATTERN = /\bdataLayer\b/;
 const DATALAYER_PATTERN_TAIL_LENGTH = 128;
+
+function chooseVariant(site: SiteConfig): Variant {
+  const variants: Variant[] = ["google"];
+  if (site.whatsapp) variants.push("whatsapp");
+  if (site.newsletter) variants.push("newsletter");
+  return variants[Math.floor(Math.random() * variants.length)];
+}
 
 class BannerVisibilityDetector {
   private tail = "";
@@ -83,9 +103,24 @@ class ParagraphInjector {
 }
 
 export default {
-  async fetch(request: Request): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const site = lookupSite(url.hostname);
+
+    if (site?.enabled && site.newsletter) {
+      if (url.pathname === NEWSLETTER_SCRIPT_PATH && request.method === "GET") {
+        return new Response(NEWSLETTER_CLIENT_SCRIPT, {
+          headers: {
+            "cache-control": "public, max-age=86400",
+            "content-type": "application/javascript; charset=utf-8",
+            "x-content-type-options": "nosniff",
+          },
+        });
+      }
+      if (url.pathname === NEWSLETTER_SUBSCRIBE_PATH && request.method === "POST") {
+        return handleNewsletterSubscription(request, env, site, url.origin);
+      }
+    }
 
     // Klik op Instellen: 302 naar Google; deze request telt de kliks in de analytics.
     if (url.pathname === CLICK_PATH) {
@@ -107,9 +142,8 @@ export default {
       return response;
     }
 
-    // A/b: heeft de site een WhatsApp-config, dan wisselen Google en WhatsApp
-    // elkaar per pageview 50/50 af.
-    const variant: Variant = site.whatsapp && Math.random() < 0.5 ? "whatsapp" : "google";
+    // Kies gelijkmatig uit alle varianten die voor deze site zijn geconfigureerd.
+    const variant = chooseVariant(site);
     const injectionState: InjectionState = { bannersHidden: false };
 
     // Bij een fout de pagina nooit breken: serveer dan de origin ongewijzigd.
@@ -126,4 +160,4 @@ export default {
       return response;
     }
   },
-} satisfies ExportedHandler;
+} satisfies ExportedHandler<Env>;

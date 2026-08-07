@@ -1,0 +1,3 @@
+# De prefix moet overeenkomen met credentialBindingPrefix in src/sites.ts.
+ECHOBOX_VOORBEELD_CLIENT_ID=""
+ECHOBOX_VOORBEELD_REFRESH_TOKEN=""

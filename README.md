@@ -4,7 +4,9 @@ Eén Cloudflare Worker die op meerdere Mediahuis-sites (resport.nl, culy.nl, …
 via `HTMLRewriter` een "aanjager"-CTA injecteert direct ná de eerste alinea
 binnen het `<article class="single">` op artikelpagina's. Standaard is dat een
 Google-"voorkeursbron"-blok; sites met een `whatsapp`-config draaien een
-50/50-a/b-test met een "Volg ons op WhatsApp"-blok in dezelfde opmaak.
+a/b-test met een "Volg ons op WhatsApp"-blok in dezelfde opmaak. Een optionele
+`newsletter`-config voegt een derde variant toe waarmee lezers via de Echobox
+Email API kunnen inschrijven.
 
 ## Hoe het werkt
 
@@ -15,7 +17,8 @@ De Worker draait als route vóór de origin van elke geconfigureerde zone:
 2. Requests op de klikpaden krijgen een `302`: `/__google-aanjager/click` naar
    de Google-voorkeursbron van die site, `/__aanjager/click-whatsapp` naar het
    WhatsApp-kanaal (zie *Kliks tellen*).
-3. Niet-`GET`-requests worden ongewijzigd doorgelaten.
+3. Een `POST` op `/__aanjager/subscribe-newsletter` wordt server-side naar
+   Echobox gestuurd; andere niet-`GET`-requests gaan ongewijzigd door.
 4. De origin-respons wordt opgehaald. Een subrequest naar dezelfde route
    triggert de Worker niet opnieuw, dus er ontstaat geen loop.
 5. Alleen responses met `content-type: text/html` worden door `HTMLRewriter`
@@ -69,7 +72,44 @@ whatsapp: {
 },
 ```
 
-Zonder `whatsapp`-config toont een site altijd het Google-blok.
+Zonder `whatsapp`- of `newsletter`-config toont een site altijd het Google-blok.
+Met twee varianten is de verdeling 50/50; met alle drie is die per pageview
+gelijkmatig 1/3 per variant.
+
+### Nieuwsbrief via Echobox
+
+De browser praat alleen met de Worker. De Worker wisselt de per-property
+`CLIENT_ID` en `REFRESH_TOKEN` om voor Echobox identity tokens, haalt daarmee
+een kortlevende Email Client Service Token op en roept daarna de
+campagne-inschrijfroute aan. Identity- en service-tokens worden in de Worker-
+isolate gecachet; secrets en tokens komen nooit in de geïnjecteerde HTML.
+
+Voeg per site een nieuwsbriefconfig toe:
+
+```ts
+newsletter: {
+  heading: "Elke dag het beste van Voorbeeld",
+  subtext: "Ontvang het laatste nieuws direct in je inbox.",
+  buttonLabel: "Inschrijven",
+  campaignUrn: "urn:newsletter:campaign:UUID-UIT-ECHOBOX",
+  credentialBindingPrefix: "ECHOBOX_VOORBEELD",
+  privacyUrl: "https://www.voorbeeld.nl/privacybeleid/",
+},
+```
+
+Maak de API-credentials in Echobox aan via **Settings → Property → API** en zet
+ze als Cloudflare-secrets. De prefix uit de siteconfig bepaalt de bindingsnamen:
+
+```bash
+npx wrangler secret put ECHOBOX_VOORBEELD_CLIENT_ID
+npx wrangler secret put ECHOBOX_VOORBEELD_REFRESH_TOKEN
+```
+
+Voor lokaal gebruik kun je `.dev.vars.example` kopiëren naar `.dev.vars` en de
+waarden invullen. `.dev.vars` staat in `.gitignore` en mag niet worden gecommit.
+Zie de [Echobox-authenticatie](https://docs.echobox.com/reference/authentication),
+de [Email Client Service Token-flow](https://docs.echobox.com/reference/getting-started-email)
+en de [campaign subscribe-endpoint](https://docs.echobox.com/reference/endpoints-subscribe-unsubscribe-from-a-campaign).
 
 ## Kliks tellen
 
