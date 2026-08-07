@@ -87,7 +87,7 @@ export const SITES: Record<string, SiteConfig> = {
     newsletter: {
       heading: "Het beste van Metro in je inbox",
       subtext: "Drie keer per week onze nieuwsbrief met de mooiste verhalen.",
-      buttonLabel: "Schrijf in",
+      buttonLabel: "Aanmelden",
       campaignUrn: "urn:newsletter:campaign:1bd150b3-65ce-408d-834e-eae58e5302db",
       credentialBindingPrefix: "ECHOBOX_METRO",
     },
