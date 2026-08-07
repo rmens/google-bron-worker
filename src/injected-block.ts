@@ -52,7 +52,7 @@ const STYLE = `<style>
 .aanjager-cta .aanjager-btn:hover{background:var(--aanjager-brand-dark)}
 .aanjager-cta .aanjager-btn:disabled{cursor:wait;opacity:.65}
 .aanjager-cta--newsletter{flex-wrap:wrap;row-gap:12px}
-.aanjager-cta--newsletter .aanjager-g svg{width:30px;height:30px}
+.aanjager-cta--newsletter .aanjager-g svg{width:28px;height:28px}
 .aanjager-cta--newsletter .aanjager-copy{flex:1 1 calc(100% - 58px)}
 .aanjager-cta .aanjager-newsletter-form{
   display:flex;flex-wrap:wrap;gap:8px;margin:0 0 0 58px;width:calc(100% - 58px)
@@ -92,7 +92,7 @@ const STYLE = `<style>
   .aanjager-cta{gap:12px}
   .aanjager-cta .aanjager-g{flex-basis:40px;width:40px;height:40px}
   .aanjager-cta .aanjager-g svg{width:22px;height:22px}
-  .aanjager-cta--newsletter .aanjager-g svg{width:25px;height:25px}
+  .aanjager-cta--newsletter .aanjager-g svg{width:23px;height:23px}
   .aanjager-cta .aanjager-copy b{font-size:14.5px}
   .aanjager-cta .aanjager-copy span{font-size:12.5px}
 }
