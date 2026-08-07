@@ -57,9 +57,13 @@ const STYLE = `<style>
   display:flex;flex-wrap:wrap;gap:8px;margin:0 0 0 58px;width:calc(100% - 58px)
 }
 .aanjager-cta .aanjager-newsletter-input{
-  flex:1 1 210px;min-width:0;height:40px;border:1px solid var(--aanjager-border);
-  border-radius:6px;padding:8px 11px;background:#fff;color:var(--aanjager-ink);
+  flex:1 1 210px;min-width:0;height:44px !important;margin:0 !important;
+  border:1px solid var(--aanjager-border) !important;
+  border-radius:6px !important;padding:8px 11px !important;background:#fff;color:var(--aanjager-ink);
   font:400 13.5px/1.4 'Poppins',sans-serif;
+}
+.aanjager-cta .aanjager-newsletter-form .aanjager-btn{
+  height:44px !important;min-height:44px;padding-top:0;padding-bottom:0;
 }
 .aanjager-cta .aanjager-newsletter-input:focus{outline:2px solid var(--aanjager-brand);outline-offset:1px}
 .aanjager-cta .aanjager-newsletter-status{
