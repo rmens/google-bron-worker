@@ -93,7 +93,6 @@ newsletter: {
   buttonLabel: "Inschrijven",
   campaignUrn: "urn:newsletter:campaign:UUID-UIT-ECHOBOX",
   credentialBindingPrefix: "ECHOBOX_VOORBEELD",
-  privacyUrl: "https://www.voorbeeld.nl/privacybeleid/",
 },
 ```
 

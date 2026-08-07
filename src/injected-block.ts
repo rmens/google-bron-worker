@@ -66,10 +66,6 @@ const STYLE = `<style>
 }
 .aanjager-cta .aanjager-newsletter-status[data-state="success"]{color:#16723a}
 .aanjager-cta .aanjager-newsletter-status[data-state="error"]{color:#b42318}
-.aanjager-cta .aanjager-newsletter-privacy{
-  display:block;margin:-4px 0 0 58px;font-size:11px;color:#6b7785
-}
-.aanjager-cta .aanjager-newsletter-privacy a{color:inherit;text-decoration:underline}
 .aanjager-cta .aanjager-honeypot{
   position:absolute!important;width:1px!important;height:1px!important;padding:0!important;
   margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;
@@ -84,7 +80,6 @@ const STYLE = `<style>
   .aanjager-cta .aanjager-btn{flex:0 0 auto;max-width:240px;margin:0 auto;padding:12px 16px;font-size:14px;min-height:44px}
   .aanjager-cta .aanjager-newsletter-form{margin-left:0;width:100%}
   .aanjager-cta .aanjager-newsletter-form .aanjager-btn{margin:0}
-  .aanjager-cta .aanjager-newsletter-privacy{margin-left:0}
 }
 @media(max-width:360px){
   .aanjager-cta{gap:12px}
@@ -97,7 +92,7 @@ const STYLE = `<style>
 .aanjager-cta--dark .aanjager-copy b{color:#fff}
 .aanjager-cta--dark .aanjager-copy span{color:#a7a7a7}
 .aanjager-cta--dark .aanjager-newsletter-input{background:#262626;color:#fff;border-color:rgba(255,255,255,.2)}
-.aanjager-cta--dark .aanjager-newsletter-status,.aanjager-cta--dark .aanjager-newsletter-privacy{color:#a7a7a7}
+.aanjager-cta--dark .aanjager-newsletter-status{color:#a7a7a7}
 .aanjager-cta--dark .aanjager-newsletter-status[data-state="success"]{color:#6ee7a0}
 .aanjager-cta--dark .aanjager-newsletter-status[data-state="error"]{color:#fda29b}
 .aanjager-cta--whatsapp{--aanjager-brand:#25D366;--aanjager-brand-dark:#1DA851}
@@ -205,8 +200,7 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
     <label class="aanjager-honeypot">Laat dit veld leeg<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
     <button class="aanjager-btn" type="submit">${esc(newsletter.buttonLabel)}</button>
     <span class="aanjager-newsletter-status" role="status" aria-live="polite"></span>
-  </form>
-  <small class="aanjager-newsletter-privacy">Lees hoe ${esc(site.name)} met je gegevens omgaat in het <a href="${esc(newsletter.privacyUrl)}" target="_blank" rel="noopener">privacybeleid</a>.</small>`,
+  </form>`,
       trailingHtml: `<script src="${NEWSLETTER_SCRIPT_PATH}" defer></script>
 `,
     });

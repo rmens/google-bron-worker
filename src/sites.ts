@@ -29,7 +29,6 @@ export interface SiteConfig {
     campaignUrn: string;
     /** Prefix van de Cloudflare-secrets: <prefix>_CLIENT_ID en <prefix>_REFRESH_TOKEN. */
     credentialBindingPrefix: string;
-    privacyUrl: string;
   };
 }
 
@@ -78,6 +77,16 @@ export const SITES: Record<string, SiteConfig> = {
       subtext: "De opvallendste nieuwtjes, mooiste verhalen en handigste tips direct in WhatsApp.",
       buttonLabel: "Volg Metro",
       url: "https://whatsapp.com/channel/0029VaZVwso84Om3u2Bnqd1m",
+    },
+    // TODO: voor livegang de secrets zetten:
+    // npx wrangler secret put ECHOBOX_METRO_CLIENT_ID en
+    // npx wrangler secret put ECHOBOX_METRO_REFRESH_TOKEN.
+    newsletter: {
+      heading: "Het beste van Metro in je inbox",
+      subtext: "Meld je aan voor onze nieuwsbrief en ontvang tot drie keer per week een selectie van onze mooiste verhalen.",
+      buttonLabel: "Schrijf in",
+      campaignUrn: "urn:newsletter:campaign:1bd150b3-65ce-408d-834e-eae58e5302db",
+      credentialBindingPrefix: "ECHOBOX_METRO",
     },
   },
   "nsmbl.nl": {
