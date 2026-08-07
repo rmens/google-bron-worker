@@ -51,7 +51,8 @@ const STYLE = `<style>
 }
 .aanjager-cta .aanjager-btn:hover{background:var(--aanjager-brand-dark)}
 .aanjager-cta .aanjager-btn:disabled{cursor:wait;opacity:.65}
-.aanjager-cta--newsletter{flex-wrap:wrap}
+.aanjager-cta--newsletter{flex-wrap:wrap;row-gap:12px}
+.aanjager-cta--newsletter .aanjager-copy{flex:1 1 calc(100% - 58px)}
 .aanjager-cta .aanjager-newsletter-form{
   display:flex;flex-wrap:wrap;gap:8px;margin:0 0 0 58px;width:calc(100% - 58px)
 }
@@ -64,6 +65,7 @@ const STYLE = `<style>
 .aanjager-cta .aanjager-newsletter-status{
   display:block;flex:1 0 100%;min-height:18px;font-size:12.5px;color:#5a5f6b
 }
+.aanjager-cta .aanjager-newsletter-status:empty{display:none}
 .aanjager-cta .aanjager-newsletter-status[data-state="success"]{color:#16723a}
 .aanjager-cta .aanjager-newsletter-status[data-state="error"]{color:#b42318}
 .aanjager-cta .aanjager-honeypot{
