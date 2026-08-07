@@ -86,6 +86,7 @@ const STYLE = `<style>
   .aanjager-cta .aanjager-copy{flex:1 1 calc(100% - 58px)}
   .aanjager-cta .aanjager-btn{flex:0 0 auto;max-width:240px;margin:0 auto;padding:12px 16px;font-size:14px;min-height:44px}
   .aanjager-cta .aanjager-newsletter-form{margin-left:0;width:100%}
+  .aanjager-cta .aanjager-newsletter-form .aanjager-newsletter-input{flex:1 1 0;width:0}
   .aanjager-cta .aanjager-newsletter-form .aanjager-btn{margin:0}
 }
 @media(max-width:360px){
