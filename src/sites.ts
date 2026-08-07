@@ -71,7 +71,7 @@ export const SITES: Record<string, SiteConfig> = {
   "metronieuws.nl": {
     enabled: true,
     name: "Metro",
-    heading: "Sneller bij het nieuws dat ertoe doet",
+    heading: "Sneller bij nieuws dat ertoe doet",
     subtext: "Stel Metro in als voorkeursbron en je vindt ons nieuws altijd terug in Google.",
     buttonLabel: "Instellen →",
     googleQuery: "metronieuws.nl",
