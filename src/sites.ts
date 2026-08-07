@@ -45,6 +45,9 @@ export const NEWSLETTER_SUBSCRIBE_PATH = "/__aanjager/subscribe-newsletter";
 // Externe same-origin scriptresource, zodat de integratie niet van inline JavaScript afhangt.
 export const NEWSLETTER_SCRIPT_PATH = "/__aanjager/newsletter.js";
 
+// Gezet na een geslaagde inschrijving; de Worker laat de nieuwsbriefvariant dan weg.
+export const NEWSLETTER_SUBSCRIBED_COOKIE = "__aanjager-nl-sub";
+
 // Alle directe kinderen van een post-article (niet recepten: data-type="recipe").
 export const BLOCK_SELECTOR = 'article.single[data-type="post"] > *';
 

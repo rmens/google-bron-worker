@@ -9,6 +9,7 @@ import {
   CLICK_PATH,
   NEWSLETTER_SCRIPT_PATH,
   NEWSLETTER_SUBSCRIBE_PATH,
+  NEWSLETTER_SUBSCRIBED_COOKIE,
   WHATSAPP_CLICK_PATH,
   lookupSite,
   type SiteConfig,
@@ -25,10 +26,12 @@ const HIDDEN_BANNERS_PATTERN =
 const DATALAYER_NAME_PATTERN = /\bdataLayer\b/;
 const DATALAYER_PATTERN_TAIL_LENGTH = 128;
 
-function chooseVariant(site: SiteConfig): Variant {
+function chooseVariant(site: SiteConfig, cookieHeader: string | null): Variant {
   const variants: Variant[] = ["google"];
   if (site.whatsapp) variants.push("whatsapp");
-  if (site.newsletter) variants.push("newsletter");
+  // Wie zich via dit blok al heeft ingeschreven, krijgt de nieuwsbrief niet meer.
+  const subscribed = cookieHeader?.includes(`${NEWSLETTER_SUBSCRIBED_COOKIE}=1`) ?? false;
+  if (site.newsletter && !subscribed) variants.push("newsletter");
   return variants[Math.floor(Math.random() * variants.length)];
 }
 
@@ -143,7 +146,7 @@ export default {
     }
 
     // Kies gelijkmatig uit alle varianten die voor deze site zijn geconfigureerd.
-    const variant = chooseVariant(site);
+    const variant = chooseVariant(site, request.headers.get("cookie"));
     const injectionState: InjectionState = { bannersHidden: false };
 
     // Bij een fout de pagina nooit breken: serveer dan de origin ongewijzigd.

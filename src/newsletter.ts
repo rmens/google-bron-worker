@@ -3,7 +3,7 @@
 
 import { subscribeWithEchobox } from "./echobox";
 import { esc } from "./injected-block";
-import type { SiteConfig } from "./sites";
+import { NEWSLETTER_SUBSCRIBED_COOKIE, type SiteConfig } from "./sites";
 
 export interface Env {
   [binding: string]: unknown;
@@ -11,6 +11,9 @@ export interface Env {
 
 const MAX_SUBSCRIPTION_BODY_BYTES = 4_096;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Een jaar geldig; alleen als signaal om de nieuwsbriefvariant over te slaan.
+const SUBSCRIBED_COOKIE_VALUE = `${NEWSLETTER_SUBSCRIBED_COOKIE}=1; Max-Age=31536000; Path=/; Secure; SameSite=Lax`;
 
 interface SubscriptionResult {
   ok: boolean;
@@ -111,10 +114,15 @@ export async function handleNewsletterSubscription(
   site: SiteConfig,
   expectedOrigin: string,
 ): Promise<Response> {
-  const respond = wantsJson(request)
-    ? jsonResponse
-    : (body: SubscriptionResult, status = 200) =>
-        htmlResponse(body.message, status, safeBackUrl(request, expectedOrigin));
+  const asJson = wantsJson(request);
+  const respond = (body: SubscriptionResult, status = 200): Response => {
+    const response = asJson
+      ? jsonResponse(body, status)
+      : htmlResponse(body.message, status, safeBackUrl(request, expectedOrigin));
+    // Ook op het honeypot-"succes", zodat het antwoord voor bots identiek blijft.
+    if (body.ok) response.headers.append("set-cookie", SUBSCRIBED_COOKIE_VALUE);
+    return response;
+  };
 
   const newsletter = site.newsletter;
   if (!newsletter) return respond({ ok: false, message: "Niet gevonden." }, 404);

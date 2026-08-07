@@ -83,6 +83,9 @@ De browser praat alleen met de Worker. De Worker wisselt de per-property
 een kortlevende Email Client Service Token op en roept daarna de
 campagne-inschrijfroute aan. Identity- en service-tokens worden in de Worker-
 isolate gecachet; secrets en tokens komen nooit in de geïnjecteerde HTML.
+Na een geslaagde inschrijving zet de Worker een jaar lang een cookie
+(`__aanjager-nl-sub`), zodat die bezoeker de nieuwsbriefvariant niet meer
+te zien krijgt en terugvalt op de overige varianten.
 
 Voeg per site een nieuwsbriefconfig toe:
 
