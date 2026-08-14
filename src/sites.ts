@@ -30,6 +30,14 @@ export interface SiteConfig {
     /** Prefix van de Cloudflare-secrets: <prefix>_CLIENT_ID en <prefix>_REFRESH_TOKEN. */
     credentialBindingPrefix: string;
   };
+  /** Indien gezet: extra campagnevariant voor Website van het Jaar. */
+  websiteVanHetJaar?: {
+    heading: string;
+    subtext: string;
+    buttonLabel: string;
+    /** Persoonlijke stempagina van de genomineerde. */
+    url: string;
+  };
 }
 
 // De Instellen-knop linkt hierheen; het "__"-prefix voorkomt verwarring met een artikel.
@@ -44,6 +52,10 @@ export const NEWSLETTER_SUBSCRIBE_PATH = "/__aanjager/subscribe-newsletter";
 
 // Externe same-origin scriptresource, zodat de integratie niet van inline JavaScript afhangt.
 export const NEWSLETTER_SCRIPT_PATH = "/__aanjager/newsletter.js";
+
+// Eigen klikroute voor de Website van het Jaar-variant, zodat de kliks apart telbaar zijn.
+export const WEBSITE_VAN_HET_JAAR_CLICK_PATH =
+  "/__aanjager/click-website-van-het-jaar";
 
 // Gezet na een geslaagde inschrijving; de Worker laat de nieuwsbriefvariant dan weg.
 export const NEWSLETTER_SUBSCRIBED_COOKIE = "__aanjager-newsletter-subscribed";
@@ -90,6 +102,12 @@ export const SITES: Record<string, SiteConfig> = {
       buttonLabel: "Aanmelden",
       campaignUrn: "urn:newsletter:campaign:1bd150b3-65ce-408d-834e-eae58e5302db",
       credentialBindingPrefix: "ECHOBOX_METRO",
+    },
+    websiteVanHetJaar: {
+      heading: "Stem op Metro. Win bol.com-tegoed.",
+      subtext: "Samen maken we Metro Website van het Jaar 2026.",
+      buttonLabel: "Stem nu",
+      url: "https://www.websitevhjaar.nl/participants/metro",
     },
   },
   "nsmbl.nl": {

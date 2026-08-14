@@ -6,7 +6,8 @@ binnen het `<article class="single">` op artikelpagina's. Standaard is dat een
 Google-"voorkeursbron"-blok; sites met een `whatsapp`-config draaien een
 a/b-test met een "Volg ons op WhatsApp"-blok in dezelfde opmaak. Een optionele
 `newsletter`-config voegt een derde variant toe waarmee lezers via de Echobox
-Email API kunnen inschrijven.
+Email API kunnen inschrijven. Een optionele `websiteVanHetJaar`-config voegt
+een campagnevariant toe voor Website van het Jaar.
 
 ## Hoe het werkt
 
@@ -16,7 +17,8 @@ De Worker draait als route vóór de origin van elke geconfigureerde zone:
    `www.` wordt genegeerd). Onbekende hosts gaan ongewijzigd door.
 2. Requests op de klikpaden krijgen een `302`: `/__google-aanjager/click` naar
    de Google-voorkeursbron van die site, `/__aanjager/click-whatsapp` naar het
-   WhatsApp-kanaal (zie *Kliks tellen*).
+   WhatsApp-kanaal en `/__aanjager/click-website-van-het-jaar` naar de
+   persoonlijke stempagina (zie *Kliks tellen*).
 3. Een `POST` op `/__aanjager/subscribe-newsletter` wordt server-side naar
    Echobox gestuurd; andere niet-`GET`-requests gaan ongewijzigd door.
 4. De origin-respons wordt opgehaald. Een subrequest naar dezelfde route
@@ -72,9 +74,23 @@ whatsapp: {
 },
 ```
 
-Zonder `whatsapp`- of `newsletter`-config toont een site altijd het Google-blok.
-Met twee varianten is de verdeling 50/50; met alle drie is die per pageview
-gelijkmatig 1/3 per variant.
+Zonder extra variantconfig toont een site altijd het Google-blok. Elke
+geconfigureerde variant wordt per pageview met gelijke kans gekozen.
+
+### Website van het Jaar
+
+Geef een site een `websiteVanHetJaar`-config om de campagnevariant mee te laten
+draaien. De persoonlijke stempagina blijft in de siteconfig staan; presentatie
+en het vereenvoudigde WIN-beeldmerk staan gedeeld in `src/injected-block.ts`.
+
+```ts
+websiteVanHetJaar: {
+  heading: "Stem op Voorbeeld. Win bol.com-tegoed.",
+  subtext: "Samen maken we Voorbeeld Website van het Jaar 2026.",
+  buttonLabel: "Stem nu",
+  url: "https://www.websitevhjaar.nl/participants/voorbeeld",
+},
+```
 
 ### Nieuwsbrief via Echobox
 
@@ -122,6 +138,8 @@ de Worker met een `302` doorstuurt:
   `https://www.google.com/preferences/source?q=<domein-van-de-site>`. (Dit pad
   behoudt zijn oude `google-`-naam: hier hangt de bestaande klikdata aan.)
 - WhatsApp-blok: `/__aanjager/click-whatsapp` → de kanaal-URL uit de config.
+- Website van het Jaar-blok: `/__aanjager/click-website-van-het-jaar` → de
+  persoonlijke stempagina uit de config.
 
 Elke klik is zo één HTTP-request op dat pad, dat Cloudflare al meetelt in de
 zone-/HTTP-analytics — geen aparte tracking-infrastructuur nodig. Het
@@ -129,7 +147,7 @@ zone-/HTTP-analytics — geen aparte tracking-infrastructuur nodig. Het
 
 Aantal kliks opvragen via de [GraphQL Analytics
 API](https://developers.cloudflare.com/analytics/graphql-api/) — filter
-`httpRequestsAdaptiveGroups` op `clientRequestPath` (een van de twee paden
+`httpRequestsAdaptiveGroups` op `clientRequestPath` (een van de klikpaden
 hierboven) en `clientRequestHTTPHost` op de site. Let op: deze dataset is adaptief gesampled
 en heeft beperkte retentie; voor exacte, langdurige tellingen is Workers
 Analytics Engine of Logpush nauwkeuriger.
@@ -146,6 +164,11 @@ Open daarnaast [`preview.html`](preview.html) rechtstreeks in een browser voor
 een overzicht van de drie widgetontwerpen: Google, WhatsApp en nieuwsbrief. De
 pagina kan tussen desktop- en mobiele breedte wisselen; links en formulieren
 zijn er uitgeschakeld.
+
+[`preview-woty.html`](preview-woty.html) bevat daarnaast de definitieve
+Type-weave-preview van de Website van het Jaar 2026-variant. Het ronde
+WIN-beeldmerk en de officiële kranssegmenten en ruitjes blijven binnen dezelfde
+maatvoering als de huidige widgets.
 
 ## Deployen
 

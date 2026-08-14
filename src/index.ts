@@ -10,6 +10,7 @@ import {
   NEWSLETTER_SCRIPT_PATH,
   NEWSLETTER_SUBSCRIBE_PATH,
   NEWSLETTER_SUBSCRIBED_COOKIE,
+  WEBSITE_VAN_HET_JAAR_CLICK_PATH,
   WHATSAPP_CLICK_PATH,
   lookupSite,
   type SiteConfig,
@@ -32,6 +33,7 @@ function chooseVariant(site: SiteConfig, cookieHeader: string | null): Variant {
   // Wie zich via dit blok al heeft ingeschreven, krijgt de nieuwsbrief niet meer.
   const subscribed = cookieHeader?.includes(`${NEWSLETTER_SUBSCRIBED_COOKIE}=1`) ?? false;
   if (site.newsletter && !subscribed) variants.push("newsletter");
+  if (site.websiteVanHetJaar) variants.push("website-van-het-jaar");
   return variants[Math.floor(Math.random() * variants.length)];
 }
 
@@ -136,6 +138,12 @@ export default {
     if (url.pathname === WHATSAPP_CLICK_PATH) {
       if (!site?.whatsapp) return fetch(request);
       return Response.redirect(site.whatsapp.url, 302);
+    }
+
+    // Website van het Jaar-kliks gaan via een eigen pad naar de persoonlijke stempagina.
+    if (url.pathname === WEBSITE_VAN_HET_JAAR_CLICK_PATH) {
+      if (!site?.websiteVanHetJaar) return fetch(request);
+      return Response.redirect(site.websiteVanHetJaar.url, 302);
     }
 
     if (!site?.enabled || request.method !== "GET") return fetch(request);

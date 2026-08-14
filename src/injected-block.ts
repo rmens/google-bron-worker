@@ -5,6 +5,7 @@ import {
   CLICK_PATH,
   NEWSLETTER_SCRIPT_PATH,
   NEWSLETTER_SUBSCRIBE_PATH,
+  WEBSITE_VAN_HET_JAAR_CLICK_PATH,
   WHATSAPP_CLICK_PATH,
   type SiteConfig,
 } from "./sites";
@@ -105,6 +106,32 @@ const STYLE = `<style>
 .aanjager-cta--dark .aanjager-newsletter-status[data-state="success"]{color:#6ee7a0}
 .aanjager-cta--dark .aanjager-newsletter-status[data-state="error"]{color:#fda29b}
 .aanjager-cta--whatsapp{--aanjager-brand:#25D366;--aanjager-brand-dark:#1DA851}
+.aanjager-cta--website-van-het-jaar{
+  --aanjager-brand:#F9AF00;--aanjager-brand-dark:#FFC43B;
+  position:relative;isolation:isolate;overflow:hidden;
+  color:#fff;background:#160042 !important;border-color:#160042 !important;
+}
+.aanjager-cta--website-van-het-jaar .aanjager-wvhj-confetti{
+  position:absolute;z-index:0;inset:0;overflow:hidden;color:#F9AF00;pointer-events:none;
+}
+.aanjager-cta--website-van-het-jaar .aanjager-wvhj-piece{
+  position:absolute;left:var(--wvhj-x);top:var(--wvhj-y);width:10px;height:16px;
+  opacity:var(--wvhj-opacity);transform:rotate(var(--wvhj-rotation)) scale(var(--wvhj-scale));
+  transform-origin:center;
+}
+.aanjager-cta--website-van-het-jaar .aanjager-wvhj-piece--diamond{width:12px;height:17px}
+.aanjager-cta--website-van-het-jaar .aanjager-g{
+  position:relative;z-index:2;color:#160042;background:#F9AF00;border:2px solid #fff;
+}
+.aanjager-cta--website-van-het-jaar .aanjager-wvhj-win{
+  font-size:16px;font-weight:800;line-height:1;letter-spacing:-.035em;
+}
+.aanjager-cta--website-van-het-jaar .aanjager-copy,
+.aanjager-cta--website-van-het-jaar .aanjager-btn{position:relative;z-index:2}
+.aanjager-cta--website-van-het-jaar .aanjager-copy{text-shadow:0 1px 7px #160042}
+.aanjager-cta--website-van-het-jaar .aanjager-copy b{color:#fff}
+.aanjager-cta--website-van-het-jaar .aanjager-copy span{color:#DDD5EF}
+.aanjager-cta--website-van-het-jaar .aanjager-btn{color:#160042 !important;font-weight:700}
 </style>`;
 
 const WHATSAPP_SVG = `<svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#25D366" d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>`;
@@ -112,6 +139,56 @@ const WHATSAPP_SVG = `<svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/s
 const GOOGLE_SVG = `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
 
 const NEWSLETTER_SVG = `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="aanjager-nl-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34C600"/><stop offset="1" stop-color="#2DAC00"/></linearGradient></defs><rect x="4" y="10" width="40" height="28" rx="7" fill="url(#aanjager-nl-grad)"/><path d="m10 16.5 14 11 14-11" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+const WEBSITE_VAN_HET_JAAR_ICON = `<span class="aanjager-wvhj-win" aria-hidden="true">WIN</span>`;
+
+type WebsiteVanHetJaarPiece = readonly [
+  type: "segment" | "diamond",
+  x: number,
+  y: number,
+  rotation: number,
+  scale: number,
+  opacity: number,
+];
+
+const WEBSITE_VAN_HET_JAAR_PIECES: readonly WebsiteVanHetJaarPiece[] = [
+  ["segment", -2, -7, -35, 2.1, 0.5],
+  ["diamond", 12, 48, 45, 1, 0.25],
+  ["segment", 23, -5, -22, 2.8, 0.1],
+  ["segment", 38, 42, -58, 2.4, 0.1],
+  ["diamond", 52, 7, 45, 1.8, 0.09],
+  ["segment", 64, 46, -30, 2.7, 0.1],
+  ["segment", 80, -9, -48, 2.3, 0.13],
+  ["diamond", 97, 42, 45, 1.5, 0.42],
+];
+
+function renderWebsiteVanHetJaarConfetti(): string {
+  const pieces = [...WEBSITE_VAN_HET_JAAR_PIECES];
+
+  for (let index = 0; pieces.length < 24; index += 1) {
+    const [type, x, y, rotation, scale, opacity] =
+      WEBSITE_VAN_HET_JAAR_PIECES[index % WEBSITE_VAN_HET_JAAR_PIECES.length];
+    const layer = Math.floor(index / WEBSITE_VAN_HET_JAAR_PIECES.length) + 1;
+    pieces.push([
+      index % 4 === 0 ? "diamond" : type,
+      ((x + (29 * layer) + (9 * index) + 4) % 108) - 4,
+      ((y + (21 * layer) + (13 * index) + 12) % 92) - 12,
+      rotation + (47 * layer) + (17 * index),
+      Math.max(0.75, scale * (0.82 - (0.08 * layer))),
+      Math.max(0.12, Math.min(0.42, opacity * (0.72 - (0.08 * layer)))),
+    ]);
+  }
+
+  const shapes = pieces.map(([type, x, y, rotation, scale, opacity]) => {
+    const shape = type === "diamond"
+      ? `<polygon points="67.5146 129.2969 72.756 137.2566 77.9963 129.2969 72.756 121.3371 67.5146 129.2969"/>`
+      : `<path d="M34.2521 41.6178 28.4719 30.6275c-1.0965 1.1545-2.1539 2.3458-3.1589 3.5828l6.0356 11.4789c.9002-1.4077 1.8684-2.7663 2.9035-4.0713"/>`;
+    const viewBox = type === "diamond" ? "67 121 12 17" : "25 30 10 16";
+    return `<svg class="aanjager-wvhj-piece aanjager-wvhj-piece--${type}" viewBox="${viewBox}" aria-hidden="true" style="--wvhj-x:${x}%;--wvhj-y:${y}px;--wvhj-rotation:${rotation}deg;--wvhj-scale:${scale};--wvhj-opacity:${opacity}" fill="currentColor">${shape}</svg>`;
+  }).join("");
+
+  return `<span class="aanjager-wvhj-confetti" aria-hidden="true">${shapes}</span>`;
+}
 
 export const NEWSLETTER_CLIENT_SCRIPT = `(() => {
   if (window.__aanjagerNewsletterLoaded) return;
@@ -156,7 +233,11 @@ export function esc(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-export type Variant = "google" | "whatsapp" | "newsletter";
+export type Variant =
+  | "google"
+  | "whatsapp"
+  | "newsletter"
+  | "website-van-het-jaar";
 
 interface CtaContent {
   /** Wrapper-modifier inclusief leidende spatie, bijv. " aanjager-cta--whatsapp". */
@@ -169,6 +250,8 @@ interface CtaContent {
   actionHtml: string;
   /** Markup na de wrapper-div, bijv. de script-tag van het formulier. */
   trailingHtml?: string;
+  /** Decoratieve markup aan het begin van de wrapper, achter de inhoud. */
+  decorationHtml?: string;
 }
 
 // Gedeelde schil (stijl, wrapper, icoon, copy); per variant alleen de invulling.
@@ -176,6 +259,7 @@ function renderCta(site: SiteConfig, content: CtaContent): string {
   const darkCls = site.theme === "dark" ? " aanjager-cta--dark" : "";
   return `${STYLE}
 <div class="aanjager-cta${content.modifierCls}${darkCls}" role="complementary" aria-label="${esc(content.ariaLabel)}">
+  ${content.decorationHtml ?? ""}
   <span class="aanjager-g">${content.svg}</span>
   <span class="aanjager-copy"><b>${esc(content.heading)}</b><span>${esc(content.subtext)}</span></span>
   ${content.actionHtml}
@@ -184,6 +268,19 @@ ${content.trailingHtml ?? ""}`;
 }
 
 function renderVariant(site: SiteConfig, variant: Variant): string {
+  if (variant === "website-van-het-jaar" && site.websiteVanHetJaar) {
+    const websiteVanHetJaar = site.websiteVanHetJaar;
+    return renderCta(site, {
+      modifierCls: " aanjager-cta--website-van-het-jaar",
+      ariaLabel: `Stem op ${site.name} voor Website van het Jaar 2026`,
+      svg: WEBSITE_VAN_HET_JAAR_ICON,
+      heading: websiteVanHetJaar.heading,
+      subtext: websiteVanHetJaar.subtext,
+      actionHtml: `<a class="aanjager-btn" href="${WEBSITE_VAN_HET_JAAR_CLICK_PATH}" target="_blank" rel="noopener">${esc(websiteVanHetJaar.buttonLabel)}</a>`,
+      decorationHtml: renderWebsiteVanHetJaarConfetti(),
+    });
+  }
+
   if (variant === "whatsapp" && site.whatsapp) {
     const wa = site.whatsapp;
     return renderCta(site, {
