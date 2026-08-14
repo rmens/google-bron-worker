@@ -136,7 +136,7 @@ export const SITES: Record<string, SiteConfig> = {
     theme: "dark",
   },
   "jmouders.nl": {
-    enabled: false,
+    enabled: true,
     name: "J/M Ouders",
     heading: "Meer J/M Ouders in je Google?",
     subtext: "Vink ons aan als favoriet en mis onze beste verhalen en adviezen niet.",
