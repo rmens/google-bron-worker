@@ -2,7 +2,7 @@
 // Google-, WhatsApp- en nieuwsbriefvarianten in dezelfde gedeelde opmaak.
 
 import {
-  CLICK_PATH,
+  GOOGLE_CLICK_PATH,
   NEWSLETTER_SCRIPT_PATH,
   NEWSLETTER_SUBSCRIBE_PATH,
   WEBSITE_VAN_HET_JAAR_CLICK_PATH,
@@ -11,11 +11,9 @@ import {
 } from "./sites";
 
 const STYLE = `<style>
-.aanjager-cta{--aanjager-brand:#0F82F4;--aanjager-brand-dark:#0967c5;--aanjager-ink:#1A1A1A;--aanjager-muted:#6B7785;--aanjager-border:#E2EAF4;
-          font-family:'Poppins',sans-serif;box-sizing:border-box;color:var(--aanjager-ink);line-height:1.45;margin:28px 0;max-width:740px}
-  .aanjager-cta *,.aanjager-cta *::before,.aanjager-cta *::after{box-sizing:border-box}
-  .aanjager-cta a{text-decoration:none}
 .aanjager-cta{
+  --aanjager-brand:#0F82F4;--aanjager-brand-dark:#0967c5;--aanjager-ink:#1A1A1A;--aanjager-border:#E2EAF4;
+  font-family:'Poppins',sans-serif;color:var(--aanjager-ink);line-height:1.45;
   display:flex;align-items:center;gap:14px;
   background:#fff !important;
   border:1px solid var(--aanjager-border) !important;
@@ -27,6 +25,8 @@ const STYLE = `<style>
   float:none !important;
   box-sizing:border-box !important;
 }
+.aanjager-cta *,.aanjager-cta *::before,.aanjager-cta *::after{box-sizing:border-box}
+.aanjager-cta a{text-decoration:none}
 .aanjager-cta .aanjager-g{
   flex:0 0 44px;width:44px;height:44px;border-radius:50%;
   background:#fff;border:1px solid var(--aanjager-border);
@@ -268,8 +268,8 @@ ${content.trailingHtml ?? ""}`;
 }
 
 function renderVariant(site: SiteConfig, variant: Variant): string {
-  if (variant === "website-van-het-jaar" && site.websiteVanHetJaar) {
-    const websiteVanHetJaar = site.websiteVanHetJaar;
+  if (variant === "website-van-het-jaar" && site.variants.websiteVanHetJaar) {
+    const websiteVanHetJaar = site.variants.websiteVanHetJaar;
     return renderCta(site, {
       modifierCls: " aanjager-cta--website-van-het-jaar",
       ariaLabel: `Stem op ${site.name} voor Website van het Jaar 2026`,
@@ -281,8 +281,8 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
     });
   }
 
-  if (variant === "whatsapp" && site.whatsapp) {
-    const wa = site.whatsapp;
+  if (variant === "whatsapp" && site.variants.whatsapp) {
+    const wa = site.variants.whatsapp;
     return renderCta(site, {
       modifierCls: " aanjager-cta--whatsapp",
       ariaLabel: `Volg ${site.name} op WhatsApp`,
@@ -293,8 +293,8 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
     });
   }
 
-  if (variant === "newsletter" && site.newsletter) {
-    const newsletter = site.newsletter;
+  if (variant === "newsletter" && site.variants.newsletter) {
+    const newsletter = site.variants.newsletter;
     return renderCta(site, {
       modifierCls: " aanjager-cta--newsletter",
       ariaLabel: `Schrijf je in voor de nieuwsbrief van ${site.name}`,
@@ -312,13 +312,18 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
     });
   }
 
+  const google = site.variants.google;
+  if (!google) {
+    throw new Error(`Google-variant ontbreekt voor ${site.name}`);
+  }
+
   return renderCta(site, {
     modifierCls: "",
     ariaLabel: `Maak ${site.name} een voorkeursbron in Google`,
     svg: GOOGLE_SVG,
-    heading: site.heading,
-    subtext: site.subtext,
-    actionHtml: `<a class="aanjager-btn" href="${CLICK_PATH}" target="_blank" rel="noopener">${esc(site.buttonLabel)}</a>`,
+    heading: google.heading,
+    subtext: google.subtext,
+    actionHtml: `<a class="aanjager-btn" href="${GOOGLE_CLICK_PATH}" target="_blank" rel="noopener">${esc(google.buttonLabel)}</a>`,
   });
 }
 
@@ -326,7 +331,7 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
 // per isolate in plaats van op elke pageview.
 const htmlCache = new Map<SiteConfig, Map<Variant, string>>();
 
-export function buildInjectedHtml(site: SiteConfig, variant: Variant = "google"): string {
+export function buildInjectedHtml(site: SiteConfig, variant: Variant): string {
   let bySite = htmlCache.get(site);
   if (!bySite) {
     bySite = new Map();

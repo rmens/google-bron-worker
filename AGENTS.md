@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository contains one TypeScript Cloudflare Worker. `src/index.ts` is the request handler and streaming `HTMLRewriter` integration. `src/sites.ts` defines supported domains, CTA copy, themes, and redirect paths. `src/injected-block.ts` builds the injected HTML, CSS, and SVG assets. Keep site-specific data in `sites.ts` and shared presentation in `injected-block.ts`.
+This repository contains one TypeScript Cloudflare Worker. `src/index.ts` is the request handler and streaming `HTMLRewriter` integration. `wrangler.jsonc` is the single source for supported domains, CTA copy, themes, and Cloudflare routes. `src/sites.ts` defines the corresponding types, shared paths, and hostname lookup. `src/injected-block.ts` builds the injected HTML, CSS, and SVG assets. Keep site-specific data in `wrangler.jsonc` and shared presentation in `injected-block.ts`.
 
 Cloudflare routes and runtime settings live in `wrangler.jsonc`; compiler rules live in `tsconfig.json`. There is currently no dedicated test directory or generated build output checked into the repository.
 
@@ -18,7 +18,7 @@ Before opening a pull request, run at least `npm run typecheck`. When changing i
 
 ## Coding Style & Naming Conventions
 
-Use TypeScript ES modules, two-space indentation, double quotes, semicolons, and trailing commas in multiline literals. The strict compiler options prohibit unused declarations, implicit returns, and unsafe fallthrough. Use `PascalCase` for types and classes, `camelCase` for functions and variables, and `UPPER_SNAKE_CASE` for exported constants such as `CLICK_PATH`.
+Use TypeScript ES modules, two-space indentation, double quotes, semicolons, and trailing commas in multiline literals. The strict compiler options prohibit unused declarations, implicit returns, and unsafe fallthrough. Use `PascalCase` for types and classes, `camelCase` for functions and variables, and `UPPER_SNAKE_CASE` for exported constants such as `GOOGLE_CLICK_PATH`.
 
 Escape all site-provided text before inserting it into HTML. Preserve the fail-open behavior: injection failures must return the unchanged origin response.
 
@@ -30,4 +30,4 @@ No automated test framework or coverage threshold is configured yet. Treat `npm 
 
 Recent history uses short Conventional Commit-style subjects, for example `chore: add other sites` and `init: inject element na eerste alinea in artikel`. Continue with imperative, lowercase subjects such as `fix: preserve origin response on rewrite error`.
 
-Pull requests should explain the user-visible change, list affected domains, and include verification steps. Link related issues when available. For CTA styling changes, attach desktop and mobile screenshots. Adding a site requires both a `src/sites.ts` entry and the corresponding `wrangler.jsonc` route.
+Pull requests should explain the user-visible change, list affected domains, and include verification steps. Link related issues when available. For CTA styling changes, attach desktop and mobile screenshots. Adding a site requires a `vars.SITES` entry and the corresponding route, both in `wrangler.jsonc`.

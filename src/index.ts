@@ -6,7 +6,7 @@ import {
 import { handleNewsletterSubscription, type Env } from "./newsletter";
 import {
   BLOCK_SELECTOR,
-  CLICK_PATH,
+  GOOGLE_CLICK_PATH,
   NEWSLETTER_SCRIPT_PATH,
   NEWSLETTER_SUBSCRIBE_PATH,
   NEWSLETTER_SUBSCRIBED_COOKIE,
@@ -27,13 +27,60 @@ const HIDDEN_BANNERS_PATTERN =
 const DATALAYER_NAME_PATTERN = /\bdataLayer\b/;
 const DATALAYER_PATTERN_TAIL_LENGTH = 128;
 
-function chooseVariant(site: SiteConfig, cookieHeader: string | null): Variant {
-  const variants: Variant[] = ["google"];
-  if (site.whatsapp) variants.push("whatsapp");
+type RedirectResolver = (site: SiteConfig) => string | undefined;
+
+const CLICK_REDIRECTS = new Map<string, RedirectResolver>([
+  [
+    GOOGLE_CLICK_PATH,
+    (site) =>
+      site.variants.google
+        ? `https://www.google.com/preferences/source?q=${encodeURIComponent(site.variants.google.query)}`
+        : undefined,
+  ],
+  [WHATSAPP_CLICK_PATH, (site) => site.variants.whatsapp?.url],
+  [
+    WEBSITE_VAN_HET_JAAR_CLICK_PATH,
+    (site) => site.variants.websiteVanHetJaar?.url,
+  ],
+]);
+
+function hasCookie(
+  cookieHeader: string | null,
+  name: string,
+  expectedValue: string,
+): boolean {
+  if (!cookieHeader) return false;
+
+  return cookieHeader.split(";").some((cookie) => {
+    const separatorIndex = cookie.indexOf("=");
+    if (separatorIndex === -1) return false;
+
+    const cookieName = cookie.slice(0, separatorIndex).trim();
+    const cookieValue = cookie.slice(separatorIndex + 1).trim();
+    return cookieName === name && cookieValue === expectedValue;
+  });
+}
+
+function chooseVariant(
+  site: SiteConfig,
+  cookieHeader: string | null,
+): Variant | undefined {
+  const variants: Variant[] = [];
+  if (site.variants.google?.enabled) variants.push("google");
+  if (site.variants.whatsapp?.enabled) variants.push("whatsapp");
   // Wie zich via dit blok al heeft ingeschreven, krijgt de nieuwsbrief niet meer.
-  const subscribed = cookieHeader?.includes(`${NEWSLETTER_SUBSCRIBED_COOKIE}=1`) ?? false;
-  if (site.newsletter && !subscribed) variants.push("newsletter");
-  if (site.websiteVanHetJaar?.enabled) variants.push("website-van-het-jaar");
+  const subscribed = hasCookie(
+    cookieHeader,
+    NEWSLETTER_SUBSCRIBED_COOKIE,
+    "1",
+  );
+  if (site.variants.newsletter?.enabled && !subscribed) {
+    variants.push("newsletter");
+  }
+  if (site.variants.websiteVanHetJaar?.enabled) {
+    variants.push("website-van-het-jaar");
+  }
+  if (variants.length === 0) return undefined;
   return variants[Math.floor(Math.random() * variants.length)];
 }
 
@@ -110,9 +157,9 @@ class ParagraphInjector {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const site = lookupSite(url.hostname);
+    const site = lookupSite(env.SITES, url.hostname);
 
-    if (site?.enabled && site.newsletter) {
+    if (site?.enabled && site.variants.newsletter) {
       if (url.pathname === NEWSLETTER_SCRIPT_PATH && request.method === "GET") {
         return new Response(NEWSLETTER_CLIENT_SCRIPT, {
           headers: {
@@ -127,23 +174,11 @@ export default {
       }
     }
 
-    // Klik op Instellen: 302 naar Google; deze request telt de kliks in de analytics.
-    if (url.pathname === CLICK_PATH) {
-      if (!site) return fetch(request);
-      const destination = `https://www.google.com/preferences/source?q=${encodeURIComponent(site.googleQuery)}`;
-      return Response.redirect(destination, 302);
-    }
-
-    // Klik op Volgen (WhatsApp-variant): 302 naar het kanaal, apart telbaar.
-    if (url.pathname === WHATSAPP_CLICK_PATH) {
-      if (!site?.whatsapp) return fetch(request);
-      return Response.redirect(site.whatsapp.url, 302);
-    }
-
-    // Website van het Jaar-kliks gaan via een eigen pad naar de persoonlijke stempagina.
-    if (url.pathname === WEBSITE_VAN_HET_JAAR_CLICK_PATH) {
-      if (!site?.websiteVanHetJaar) return fetch(request);
-      return Response.redirect(site.websiteVanHetJaar.url, 302);
+    // Externe CTA-kliks gaan via eigen paden, zodat Cloudflare ze apart kan tellen.
+    const resolveRedirect = CLICK_REDIRECTS.get(url.pathname);
+    if (resolveRedirect) {
+      const destination = site ? resolveRedirect(site) : undefined;
+      return destination ? Response.redirect(destination, 302) : fetch(request);
     }
 
     if (!site?.enabled || request.method !== "GET") return fetch(request);
@@ -155,6 +190,7 @@ export default {
 
     // Kies gelijkmatig uit alle varianten die voor deze site zijn geconfigureerd.
     const variant = chooseVariant(site, request.headers.get("cookie"));
+    if (!variant) return response;
     const injectionState: InjectionState = { bannersHidden: false };
 
     // Bij een fout de pagina nooit breken: serveer dan de origin ongewijzigd.

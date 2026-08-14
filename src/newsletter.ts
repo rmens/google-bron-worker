@@ -6,6 +6,7 @@ import { esc } from "./injected-block";
 import { NEWSLETTER_SUBSCRIBED_COOKIE, type SiteConfig } from "./sites";
 
 export interface Env {
+  SITES: Record<string, SiteConfig>;
   [binding: string]: unknown;
 }
 
@@ -124,7 +125,7 @@ export async function handleNewsletterSubscription(
     return response;
   };
 
-  const newsletter = site.newsletter;
+  const newsletter = site.variants.newsletter;
   if (!newsletter) return respond({ ok: false, message: "Niet gevonden." }, 404);
 
   if (hasInvalidOrigin(request, expectedOrigin)) {
