@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aanjager widget-preview</title>
+    <meta
+      name="description"
+      content="Preview van alle Google-, WhatsApp- en nieuwsbriefwidgets in de Aanjager Worker."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&amp;display=swap"
+      rel="stylesheet"
+    >
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #172033;
+        background: #eef2f7;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .page-header {
+        padding: 48px clamp(20px, 5vw, 72px) 36px;
+        color: #fff;
+        background:
+          radial-gradient(circle at 85% 10%, rgb(91 176 255 / 35%), transparent 28rem),
+          linear-gradient(135deg, #101a2d, #173d72);
+      }
+
+      .header-inner,
+      .main-inner {
+        width: min(1180px, 100%);
+        margin: 0 auto;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: #9fd0ff;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(32px, 5vw, 56px);
+        line-height: 1.05;
+        letter-spacing: -0.045em;
+      }
+
+      .intro {
+        max-width: 710px;
+        margin: 16px 0 0;
+        color: #d8e6f7;
+        font-size: 16px;
+        line-height: 1.65;
+      }
+
+      main {
+        padding: 28px clamp(16px, 4vw, 48px) 64px;
+      }
+
+      .toolbar {
+        position: sticky;
+        z-index: 10;
+        top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+        padding: 12px;
+        border: 1px solid #dce3ed;
+        border-radius: 14px;
+        background: rgb(255 255 255 / 92%);
+        box-shadow: 0 12px 40px rgb(23 32 51 / 10%);
+        backdrop-filter: blur(12px);
+      }
+
+      .control-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .control-label {
+        margin: 0 5px 0 3px;
+        color: #596579;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .filter-button,
+      .viewport-button {
+        min-height: 38px;
+        padding: 8px 13px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: #465268;
+        background: transparent;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .filter-button:hover,
+      .viewport-button:hover {
+        background: #edf3fa;
+      }
+
+      .filter-button[aria-pressed="true"],
+      .viewport-button[aria-pressed="true"] {
+        color: #fff;
+        background: #176fc2;
+      }
+
+      .filter-button:focus-visible,
+      .viewport-button:focus-visible {
+        outline: 3px solid #78b9f5;
+        outline-offset: 2px;
+      }
+
+      .summary {
+        margin: 0 0 20px;
+        color: #596579;
+        font-size: 14px;
+      }
+
+      .preview-grid {
+        display: grid;
+        gap: 22px;
+      }
+
+      .preview-card {
+        overflow: hidden;
+        border: 1px solid #dce3ed;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 8px 28px rgb(23 32 51 / 7%);
+      }
+
+      .preview-card[hidden] {
+        display: none;
+      }
+
+      .card-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px;
+        border-bottom: 1px solid #e6ebf2;
+      }
+
+      .card-title {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin: 0;
+        font-size: 17px;
+      }
+
+      .domain {
+        color: #69758a;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        color: #486079;
+        background: #eaf1f8;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .preview-viewport {
+        overflow-x: auto;
+        padding: 20px;
+        background:
+          linear-gradient(90deg, rgb(211 220 232 / 32%) 1px, transparent 1px),
+          linear-gradient(rgb(211 220 232 / 32%) 1px, transparent 1px),
+          #f7f9fc;
+        background-size: 24px 24px;
+      }
+
+      .preview-canvas {
+        width: var(--preview-width, 760px);
+        min-width: 320px;
+        margin: 0 auto;
+        border: 1px solid #dbe2ec;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 6px 22px rgb(23 32 51 / 8%);
+        transition: width 180ms ease;
+      }
+
+      .widget-frame {
+        display: block;
+        width: 100%;
+        height: 160px;
+        border: 0;
+        border-radius: inherit;
+      }
+
+      .preview-card[data-variant="newsletter"] .widget-frame {
+        height: 212px;
+      }
+
+      .empty-state {
+        padding: 64px 20px;
+        border: 1px dashed #bec9d7;
+        border-radius: 16px;
+        color: #596579;
+        text-align: center;
+        background: #fff;
+      }
+
+      .empty-state[hidden] {
+        display: none;
+      }
+
+      .page-footer {
+        margin-top: 32px;
+        color: #69758a;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      code {
+        padding: 2px 5px;
+        border-radius: 5px;
+        color: #31425a;
+        background: #e4eaf2;
+      }
+
+      @media (max-width: 720px) {
+        .page-header {
+          padding-top: 36px;
+        }
+
+        .toolbar {
+          align-items: flex-start;
+          top: 6px;
+        }
+
+        .toolbar,
+        .control-group {
+          width: 100%;
+        }
+
+        .control-label {
+          flex-basis: 100%;
+        }
+
+        .preview-viewport {
+          padding: 12px;
+        }
+
+        .preview-canvas {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="header-inner">
+        <p class="eyebrow">Google bron Worker</p>
+        <h1>Aanjager widgets</h1>
+        <p class="intro">
+          De drie verschillende ontwerpen in één overzicht: Google, WhatsApp en nieuwsbrief.
+          Wissel tussen desktop en mobiel of filter op variant. Links en formulieren
+          blijven in deze preview uitgeschakeld.
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <div class="main-inner">
+        <div class="toolbar" aria-label="Preview-instellingen">
+          <div class="control-group" aria-label="Filter op variant">
+            <span class="control-label">Variant</span>
+            <button class="filter-button" type="button" data-filter="all" aria-pressed="true">Alles</button>
+            <button class="filter-button" type="button" data-filter="google" aria-pressed="false">Google</button>
+            <button class="filter-button" type="button" data-filter="whatsapp" aria-pressed="false">WhatsApp</button>
+            <button class="filter-button" type="button" data-filter="newsletter" aria-pressed="false">Nieuwsbrief</button>
+          </div>
+
+          <div class="control-group" aria-label="Previewbreedte">
+            <span class="control-label">Breedte</span>
+            <button class="viewport-button" type="button" data-width="760" aria-pressed="true">Desktop · 760</button>
+            <button class="viewport-button" type="button" data-width="390" aria-pressed="false">Mobiel · 390</button>
+          </div>
+        </div>
+
+        <p id="summary" class="summary" aria-live="polite"></p>
+        <section id="preview-grid" class="preview-grid" aria-label="Widget-previews"></section>
+        <div id="empty-state" class="empty-state" hidden>Geen widgets passen bij dit filter.</div>
+
+        <p class="page-footer">
+          Deze pagina toont de drie ontwerpen uit <code>src/injected-block.ts</code> met
+          Metro als voorbeeldsite. De widgets staan in geïsoleerde frames, zodat hun eigen
+          responsive CSS op de gekozen breedte reageert.
+        </p>
+      </div>
+    </main>
+
+    <script>
+      const site = {
+        domain: "metronieuws.nl",
+        name: "Metro",
+        heading: "Sneller bij nieuws dat ertoe doet",
+        subtext: "Stel Metro in als voorkeursbron en je vindt ons nieuws altijd terug in Google.",
+        buttonLabel: "Instellen →",
+        whatsapp: {
+          heading: "Metronieuws op WhatsApp",
+          subtext: "De opvallendste nieuwtjes, mooiste verhalen en handigste tips direct in WhatsApp.",
+          buttonLabel: "Volg Metro",
+        },
+        newsletter: {
+          heading: "Het beste van Metro in je inbox",
+          subtext: "Drie keer per week onze nieuwsbrief met de mooiste verhalen.",
+          buttonLabel: "Aanmelden",
+        },
+      };
+
+      const widgetStyle = `<style>
+        html,body{margin:0;min-width:0;background:#fff}
+        .aanjager-cta{--aanjager-brand:#0F82F4;--aanjager-brand-dark:#0967c5;--aanjager-ink:#1A1A1A;--aanjager-muted:#6B7785;--aanjager-border:#E2EAF4;
+          font-family:'Poppins',sans-serif;box-sizing:border-box;color:var(--aanjager-ink);line-height:1.45;margin:28px 0;max-width:740px}
+        .aanjager-cta *,.aanjager-cta *::before,.aanjager-cta *::after{box-sizing:border-box}
+        .aanjager-cta a{text-decoration:none}
+        .aanjager-cta{display:flex;align-items:center;gap:14px;background:#fff!important;border:1px solid var(--aanjager-border)!important;border-radius:10px!important;padding:14px 16px!important;margin:28px auto!important;max-width:600px!important;width:auto!important;float:none!important;box-sizing:border-box!important}
+        .aanjager-cta .aanjager-g{flex:0 0 44px;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--aanjager-border);display:flex;align-items:center;justify-content:center}
+        .aanjager-cta .aanjager-g svg{width:26px;height:26px;display:block}
+        .aanjager-cta .aanjager-copy{flex:1 1 auto;min-width:0;line-height:1.3}
+        .aanjager-cta .aanjager-copy b{display:block;font-size:15.5px;font-weight:700;color:var(--aanjager-ink);margin:0;font-family:'Poppins',sans-serif;letter-spacing:-.005em}
+        .aanjager-cta .aanjager-copy span{display:block;font-size:13px;color:#5a5f6b;margin-top:2px;font-weight:400}
+        .aanjager-cta .aanjager-btn{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:var(--aanjager-brand);color:#fff!important;font-weight:600;font-size:13.5px;letter-spacing:.01em;padding:10px 16px;min-height:40px;border-radius:6px;white-space:nowrap;transition:background .15s;text-decoration:none;border:0;font-family:'Poppins',sans-serif;cursor:pointer}
+        .aanjager-cta .aanjager-btn:hover{background:var(--aanjager-brand-dark)}
+        .aanjager-cta .aanjager-btn:disabled{cursor:wait;opacity:.65}
+        .aanjager-cta--newsletter{--aanjager-brand:#34C600;--aanjager-brand-dark:#2DAC00;flex-wrap:wrap;row-gap:12px}
+        .aanjager-cta--newsletter .aanjager-g svg{width:28px;height:28px}
+        .aanjager-cta--newsletter .aanjager-copy{flex:1 1 calc(100% - 58px)}
+        .aanjager-cta .aanjager-newsletter-form{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 0 58px;width:calc(100% - 58px)}
+        .aanjager-cta .aanjager-newsletter-input{flex:1 1 210px;min-width:0;height:44px!important;margin:0!important;border:1px solid var(--aanjager-border)!important;border-radius:6px!important;padding:8px 11px!important;background:#fff;color:var(--aanjager-ink);font:400 13.5px/1.4 'Poppins',sans-serif}
+        .aanjager-cta .aanjager-newsletter-form .aanjager-btn{height:44px!important;min-height:44px;padding-top:0;padding-bottom:0}
+        .aanjager-cta .aanjager-newsletter-input:focus{outline:2px solid var(--aanjager-brand);outline-offset:1px}
+        .aanjager-cta .aanjager-newsletter-status{display:block;flex:1 0 100%;min-height:18px;font-size:12.5px;color:#5a5f6b}
+        .aanjager-cta .aanjager-newsletter-status:empty{display:none}
+        .aanjager-cta .aanjager-newsletter-status[data-state="success"]{color:#16723a}
+        .aanjager-cta .aanjager-newsletter-status[data-state="error"]{color:#b42318}
+        .aanjager-cta .aanjager-honeypot{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+        @media(max-width:767px){.aanjager-cta{margin-left:20px!important;margin-right:20px!important;max-width:none!important}}
+        @media(max-width:520px){.aanjager-cta{flex-wrap:wrap;row-gap:12px;padding:14px!important}.aanjager-cta .aanjager-copy{flex:1 1 calc(100% - 58px)}.aanjager-cta .aanjager-btn{flex:0 0 auto;max-width:240px;margin:0 auto;padding:12px 16px;font-size:14px;min-height:44px}.aanjager-cta .aanjager-newsletter-form{margin-left:0;width:100%}.aanjager-cta .aanjager-newsletter-form .aanjager-newsletter-input{flex:1 1 0;width:0}.aanjager-cta .aanjager-newsletter-form .aanjager-btn{margin:0}}
+        @media(max-width:360px){.aanjager-cta{gap:12px}.aanjager-cta .aanjager-g{flex-basis:40px;width:40px;height:40px}.aanjager-cta .aanjager-g svg{width:22px;height:22px}.aanjager-cta--newsletter .aanjager-g svg{width:23px;height:23px}.aanjager-cta .aanjager-copy b{font-size:14.5px}.aanjager-cta .aanjager-copy span{font-size:12.5px}}
+        .aanjager-cta--dark{background:#1a1a1a!important;border-color:rgba(255,255,255,.12)!important;color:#ececec}
+        .aanjager-cta--dark .aanjager-copy b{color:#fff}
+        .aanjager-cta--dark .aanjager-copy span{color:#a7a7a7}
+        .aanjager-cta--dark .aanjager-newsletter-input{background:#262626;color:#fff;border-color:rgba(255,255,255,.2)}
+        .aanjager-cta--dark .aanjager-newsletter-status{color:#a7a7a7}
+        .aanjager-cta--dark .aanjager-newsletter-status[data-state="success"]{color:#6ee7a0}
+        .aanjager-cta--dark .aanjager-newsletter-status[data-state="error"]{color:#fda29b}
+        .aanjager-cta--whatsapp{--aanjager-brand:#25D366;--aanjager-brand-dark:#1DA851}
+      </style>`;
+
+      const googleSvg = `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+      const whatsappSvg = `<svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#25D366" d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>`;
+      const newsletterSvg = `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="aanjager-nl-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34C600"/><stop offset="1" stop-color="#2DAC00"/></linearGradient></defs><rect x="4" y="10" width="40" height="28" rx="7" fill="url(#aanjager-nl-grad)"/><path d="m10 16.5 14 11 14-11" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+      const variants = [
+        { site, type: "google", content: site },
+        { site, type: "whatsapp", content: site.whatsapp },
+        { site, type: "newsletter", content: site.newsletter },
+      ];
+
+      const escapeHtml = (value) => String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+
+      function renderWidget({ site, type, content }) {
+        const darkClass = site.theme === "dark" ? " aanjager-cta--dark" : "";
+        const variantClass = type === "google" ? "" : ` aanjager-cta--${type}`;
+        const icon = type === "whatsapp" ? whatsappSvg : type === "newsletter" ? newsletterSvg : googleSvg;
+        const ariaLabel = type === "whatsapp"
+          ? `Volg ${site.name} op WhatsApp`
+          : type === "newsletter"
+            ? `Schrijf je in voor de nieuwsbrief van ${site.name}`
+            : `Maak ${site.name} een voorkeursbron in Google`;
+        const action = type === "newsletter"
+          ? `<form class="aanjager-newsletter-form"><input class="aanjager-newsletter-input" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="jouw@email.nl" aria-label="E-mailadres" required><label class="aanjager-honeypot">Laat dit veld leeg<input name="website" type="text" tabindex="-1" autocomplete="off"></label><button class="aanjager-btn" type="submit">${escapeHtml(content.buttonLabel)}</button><span class="aanjager-newsletter-status" role="status" aria-live="polite"></span></form>`
+          : `<a class="aanjager-btn" href="#">${escapeHtml(content.buttonLabel)}</a>`;
+        const previewScript = `<script>document.addEventListener("click",function(event){if(event.target.closest("a"))event.preventDefault()});document.addEventListener("submit",function(event){event.preventDefault();var status=event.target.querySelector(".aanjager-newsletter-status");if(status){status.textContent="Preview: er is niets verstuurd.";status.dataset.state="success"}})<\/script>`;
+
+        return `<!doctype html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&amp;display=swap" rel="stylesheet">${widgetStyle}</head><body><div class="aanjager-cta${variantClass}${darkClass}" role="complementary" aria-label="${escapeHtml(ariaLabel)}"><span class="aanjager-g">${icon}</span><span class="aanjager-copy"><b>${escapeHtml(content.heading)}</b><span>${escapeHtml(content.subtext)}</span></span>${action}</div>${previewScript}</body></html>`;
+      }
+
+      const grid = document.querySelector("#preview-grid");
+      const summary = document.querySelector("#summary");
+      const emptyState = document.querySelector("#empty-state");
+      let activeFilter = "all";
+
+      variants.forEach((variant) => {
+        const article = document.createElement("article");
+        article.className = "preview-card";
+        article.dataset.variant = variant.type;
+        article.innerHTML = `
+          <header class="card-header">
+            <h2 class="card-title">
+              ${escapeHtml(variant.site.name)}
+              <span class="domain">${escapeHtml(variant.site.domain)}</span>
+            </h2>
+            <div class="badges">
+              <span class="badge">${escapeHtml(variant.type)}</span>
+            </div>
+          </header>
+          <div class="preview-viewport">
+            <div class="preview-canvas">
+              <iframe
+                class="widget-frame"
+                title="${escapeHtml(`${variant.site.name} ${variant.type}-widget`)}"
+                loading="lazy"
+              ></iframe>
+            </div>
+          </div>
+        `;
+        article.querySelector("iframe").srcdoc = renderWidget(variant);
+        grid.append(article);
+      });
+
+      function updatePreview() {
+        let visibleCount = 0;
+        document.querySelectorAll(".preview-card").forEach((card) => {
+          const matchesVariant = activeFilter === "all" || card.dataset.variant === activeFilter;
+          card.hidden = !matchesVariant;
+          if (!card.hidden) visibleCount += 1;
+        });
+        summary.textContent = `${visibleCount} van ${variants.length} widgets zichtbaar`;
+        emptyState.hidden = visibleCount !== 0;
+      }
+
+      document.querySelectorAll(".filter-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeFilter = button.dataset.filter;
+          document.querySelectorAll(".filter-button").forEach((candidate) => {
+            candidate.setAttribute("aria-pressed", String(candidate === button));
+          });
+          updatePreview();
+        });
+      });
+
+      document.querySelectorAll(".viewport-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.documentElement.style.setProperty("--preview-width", `${button.dataset.width}px`);
+          document.querySelectorAll(".viewport-button").forEach((candidate) => {
+            candidate.setAttribute("aria-pressed", String(candidate === button));
+          });
+        });
+      });
+
+      updatePreview();
+    </script>
+  </body>
+</html>

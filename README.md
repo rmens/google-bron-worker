@@ -142,6 +142,11 @@ npm run dev        # wrangler dev — lokale preview
 npm run typecheck  # tsc --noEmit
 ```
 
+Open daarnaast [`preview.html`](preview.html) rechtstreeks in een browser voor
+een overzicht van de drie widgetontwerpen: Google, WhatsApp en nieuwsbrief. De
+pagina kan tussen desktop- en mobiele breedte wisselen; links en formulieren
+zijn er uitgeschakeld.
+
 ## Deployen
 
 Alle doelzones moeten op hetzelfde Cloudflare-account staan; de routes in
