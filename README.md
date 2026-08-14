@@ -85,12 +85,15 @@ en het vereenvoudigde WIN-beeldmerk staan gedeeld in `src/injected-block.ts`.
 
 ```ts
 websiteVanHetJaar: {
+  enabled: false,
   heading: "Stem op Voorbeeld. Win bol.com-tegoed.",
   subtext: "Samen maken we Voorbeeld Website van het Jaar 2026.",
   buttonLabel: "Stem nu",
   url: "https://www.websitevhjaar.nl/participants/voorbeeld",
 },
 ```
+
+Zet `enabled` pas op `true` wanneer de publieksstemming geopend is.
 
 ### Nieuwsbrief via Echobox
 

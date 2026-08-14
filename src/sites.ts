@@ -32,6 +32,7 @@ export interface SiteConfig {
   };
   /** Indien gezet: extra campagnevariant voor Website van het Jaar. */
   websiteVanHetJaar?: {
+    enabled: boolean;
     heading: string;
     subtext: string;
     buttonLabel: string;
@@ -104,6 +105,7 @@ export const SITES: Record<string, SiteConfig> = {
       credentialBindingPrefix: "ECHOBOX_METRO",
     },
     websiteVanHetJaar: {
+      enabled: false,
       heading: "Stem op Metro. Win bol.com-tegoed.",
       subtext: "Samen maken we Metro Website van het Jaar 2026.",
       buttonLabel: "Stem nu",
