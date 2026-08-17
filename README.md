@@ -29,6 +29,9 @@ De Worker draait als route vóór de origin van elke geconfigureerde zone:
    `<p>`, slaat een "In het kort"-samenvatting over en plaatst het blok vóór het
    eerstvolgende directe kind. Als zo'n volgend element ontbreekt, of op andere
    pagina's, blijft de pagina ongewijzigd.
+7. Als `dataLayer[0].Tags` de losse tag `nopromo` bevat, wordt het blok niet
+   geïnjecteerd. Dit geldt ook wanneer de tag met andere tags in de
+   kommagescheiden waarde staat.
 
 De transformatie is streaming: de respons-body wordt niet in het geheugen
 geladen.

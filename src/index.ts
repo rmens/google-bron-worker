@@ -17,7 +17,7 @@ import {
 } from "./sites";
 
 interface InjectionState {
-  bannersHidden: boolean;
+  blocked: boolean;
 }
 
 // In de huidige datalayer betekent show_banners: 0 dat banners verborgen zijn.
@@ -25,7 +25,9 @@ interface InjectionState {
 const HIDDEN_BANNERS_PATTERN =
   /(?:["']?show_banners["']?\s*:\s*(?:0|false|["'](?:0|false)["'])|["']?hide_banners["']?\s*:\s*(?:1|true|["'](?:1|true)["']))(?=\s*[,}])/i;
 const DATALAYER_NAME_PATTERN = /\bdataLayer\b/;
-const DATALAYER_PATTERN_TAIL_LENGTH = 128;
+const DATALAYER_TAGS_PATTERN = /["']?Tags["']?\s*:\s*["']([^"']*)["']/gi;
+const NO_PROMO_TAG = "nopromo";
+const DATALAYER_PATTERN_TAIL_LENGTH = 512;
 
 type RedirectResolver = (site: SiteConfig) => string | undefined;
 
@@ -84,10 +86,17 @@ function chooseVariant(
   return variants[Math.floor(Math.random() * variants.length)];
 }
 
-class BannerVisibilityDetector {
+function hasNoPromoTag(script: string): boolean {
+  return [...script.matchAll(DATALAYER_TAGS_PATTERN)].some(([, tags]) =>
+    tags.split(",").some((tag) => tag.trim().toLowerCase() === NO_PROMO_TAG)
+  );
+}
+
+class InjectionEligibilityDetector {
   private tail = "";
   private dataLayerFound = false;
   private hiddenBannersFound = false;
+  private noPromoTagFound = false;
 
   constructor(private readonly state: InjectionState) {}
 
@@ -95,17 +104,22 @@ class BannerVisibilityDetector {
     this.tail = "";
     this.dataLayerFound = false;
     this.hiddenBannersFound = false;
+    this.noPromoTagFound = false;
   }
 
   text(chunk: Text): void {
-    if (this.state.bannersHidden) return;
+    if (this.state.blocked) return;
 
     const text = this.tail + chunk.text;
     this.dataLayerFound ||= DATALAYER_NAME_PATTERN.test(text);
     this.hiddenBannersFound ||= HIDDEN_BANNERS_PATTERN.test(text);
+    this.noPromoTagFound ||= hasNoPromoTag(text);
 
-    if (this.dataLayerFound && this.hiddenBannersFound) {
-      this.state.bannersHidden = true;
+    if (
+      this.dataLayerFound &&
+      (this.hiddenBannersFound || this.noPromoTagFound)
+    ) {
+      this.state.blocked = true;
       return;
     }
 
@@ -129,7 +143,7 @@ class ParagraphInjector {
 
   element(element: Element): void {
     if (this.injected) return;
-    if (this.state.bannersHidden) {
+    if (this.state.blocked) {
       this.injected = true;
       return;
     }
@@ -191,12 +205,12 @@ export default {
     // Kies gelijkmatig uit alle varianten die voor deze site zijn geconfigureerd.
     const variant = chooseVariant(site, request.headers.get("cookie"));
     if (!variant) return response;
-    const injectionState: InjectionState = { bannersHidden: false };
+    const injectionState: InjectionState = { blocked: false };
 
     // Bij een fout de pagina nooit breken: serveer dan de origin ongewijzigd.
     try {
       return new HTMLRewriter()
-        .on("script", new BannerVisibilityDetector(injectionState))
+        .on("script", new InjectionEligibilityDetector(injectionState))
         .on(
           BLOCK_SELECTOR,
           new ParagraphInjector(buildInjectedHtml(site, variant), injectionState),
