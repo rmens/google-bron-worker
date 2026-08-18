@@ -63,11 +63,12 @@
             "credentialBindingPrefix": "ECHOBOX_METRO"
           },
           "websiteVanHetJaar": {
-            "enabled": false,
-            "heading": "Stem op Metro. Win bol.com-tegoed.",
-            "subtext": "Samen maken we Metro Website van het Jaar 2026.",
+            "enabled": true,
+            "heading": "Stem op Metro en win bol.com-tegoed",
+            "subtext": "Help ons Website van het Jaar 2026 te worden.",
             "buttonLabel": "Stem nu",
-            "url": "https://www.websitevhjaar.nl/participants/metro"
+            "url": "https://www.websitevhjaar.nl/participants/metro",
+            "icon": "metro-globe"
           }
         }
       },

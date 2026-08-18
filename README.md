@@ -92,9 +92,10 @@ Iedere ingeschakelde variant wordt per pageview met gelijke kans gekozen.
 ### Website van het Jaar
 
 Geef een site onder `variants` een `websiteVanHetJaar`-config om de
-campagnevariant mee te laten draaien. De persoonlijke stempagina blijft in de
-siteconfig staan; presentatie en het vereenvoudigde WIN-beeldmerk staan gedeeld
-in `src/injected-block.ts`.
+campagnevariant mee te laten draaien. De persoonlijke stempagina en eventuele
+sitespecifieke icoonkeuze blijven in de siteconfig staan; de SVG-assets staan in
+`src/injected-block.ts`. De styling gebruikt de `--fw3-button-*`-tokens van
+de actieve site, met `--fw3-secondary` als fallback voor de huisstijlkleur.
 
 ```jsonc
 "websiteVanHetJaar": {
@@ -102,7 +103,8 @@ in `src/injected-block.ts`.
   "heading": "Stem op Voorbeeld. Win bol.com-tegoed.",
   "subtext": "Samen maken we Voorbeeld Website van het Jaar 2026.",
   "buttonLabel": "Stem nu",
-  "url": "https://www.websitevhjaar.nl/participants/voorbeeld"
+  "url": "https://www.websitevhjaar.nl/participants/voorbeeld",
+  "icon": "crown"
 },
 ```
 

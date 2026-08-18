@@ -19,6 +19,11 @@ interface LinkedCtaConfig extends VariantConfig {
   url: string;
 }
 
+interface WebsiteVanHetJaarConfig extends LinkedCtaConfig {
+  /** Sitespecifiek campagne-icoon; standaard is de gedeelde kroon. */
+  icon?: "crown" | "metro-globe";
+}
+
 interface NewsletterConfig extends VariantConfig {
   /** Echobox-campagne, bijv. urn:newsletter:campaign:UUID. */
   campaignUrn: string;
@@ -30,7 +35,7 @@ interface SiteVariants {
   google?: GoogleConfig;
   whatsapp?: LinkedCtaConfig;
   newsletter?: NewsletterConfig;
-  websiteVanHetJaar?: LinkedCtaConfig;
+  websiteVanHetJaar?: WebsiteVanHetJaarConfig;
 }
 
 export interface SiteConfig {
