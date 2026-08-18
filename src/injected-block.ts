@@ -121,7 +121,7 @@ const STYLE = `<style>
   transform:translateY(-2px)
 }
 .aanjager-cta--website-van-het-jaar .aanjager-wvhj-icon--metro{
-  width:30px;height:30px
+  width:32px;height:32px
 }
 .aanjager-cta--website-van-het-jaar .aanjager-btn{
   color:var(--fw3-button-text-color,#fff) !important;
