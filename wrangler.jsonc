@@ -11,7 +11,7 @@
   "vars": {
     "SITES": {
       "resport.nl": {
-        "enabled": false,
+        "enabled": true,
         "name": "Resport",
         "variants": {
           "google": {
@@ -24,7 +24,7 @@
         }
       },
       "culy.nl": {
-        "enabled": false,
+        "enabled": true,
         "name": "Culy",
         "variants": {
           "google": {
@@ -93,7 +93,7 @@
         }
       },
       "manners.nl": {
-        "enabled": false,
+        "enabled": true,
         "name": "Manners",
         "theme": "dark",
         "variants": {
@@ -103,6 +103,14 @@
             "subtext": "Maak ons je voorkeursbron, dan zie je het beste altijd bovenaan.",
             "buttonLabel": "Instellen →",
             "query": "manners.nl"
+          },
+          "newsletter": {
+            "enabled": true,
+            "heading": "Manners Weekly in je inbox",
+            "subtext": "Elke vrijdag de beste verhalen over geld, stijl, gezondheid en alles wat mannen beweegt.",
+            "buttonLabel": "Let's go",
+            "campaignUrn": "urn:newsletter:campaign:3d0cb072-b4b5-4570-ac6a-e3187a6108cd",
+            "credentialBindingPrefix": "ECHOBOX_MANNERS"
           }
         }
       },
