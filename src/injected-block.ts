@@ -86,7 +86,8 @@ const STYLE = `<style>
 @media(max-width:520px){
   .aanjager-cta{flex-wrap:wrap;row-gap:12px;padding:14px !important}
   .aanjager-cta .aanjager-copy{flex:1 1 calc(100% - 58px)}
-  .aanjager-cta .aanjager-btn{flex:0 0 auto;max-width:240px;margin:0 auto;padding:12px 16px;font-size:14px;min-height:44px}
+  .aanjager-cta .aanjager-btn{padding:12px 16px;font-size:14px;min-height:44px}
+  .aanjager-cta > .aanjager-btn{flex:1 0 100%;width:100%;max-width:none;margin:0}
   .aanjager-cta .aanjager-newsletter-form{margin-left:0;width:100%}
   .aanjager-cta .aanjager-newsletter-form .aanjager-newsletter-input{flex:1 1 0;width:0}
   .aanjager-cta .aanjager-newsletter-form .aanjager-btn{margin:0}
