@@ -84,7 +84,7 @@
             "query": "nsmbl.nl"
           },
           "whatsapp": {
-            "enabled": true,
+            "enabled": false,
             "heading": "Join NSMBL op WhatsApp 👀",
             "subtext": "Must-reads, winacties en uitnodigingen voor onze events. Op WhatsApp hoor jij het als eerste van ons.",
             "buttonLabel": "Volg NSMBL",
@@ -124,6 +124,13 @@
             "subtext": "Vink ons aan als favoriet en mis onze beste verhalen en adviezen niet.",
             "buttonLabel": "Instellen →",
             "query": "jmouders.nl"
+          },
+          "whatsapp": {
+            "enabled": true,
+            "heading": "J/M Ouders op WhatsApp",
+            "subtext": "Ontvang dagelijks persoonlijke verhalen, praktische opvoedtips en advies van experts.",
+            "buttonLabel": "Volg J/M Ouders",
+            "url": "https://www.whatsapp.com/channel/0029VbDgdmp002TFQyqFTj3W"
           }
         }
       },
