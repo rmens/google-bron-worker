@@ -51,6 +51,13 @@
             "subtext": "Vink ons aan als favoriet, dan staan onze lekkere recepten altijd vooraan.",
             "buttonLabel": "Instellen →",
             "query": "culy.nl"
+          },
+          "websiteVanHetJaar": {
+            "enabled": false,
+            "heading": "Stem op Culy en win bol.com-tegoed",
+            "subtext": "Help ons Website van het Jaar 2026 te worden.",
+            "buttonLabel": "Stem nu",
+            "url": "https://www.websitevhjaar.nl/participants/culy"
           }
         }
       },
@@ -73,7 +80,7 @@
             "url": "https://whatsapp.com/channel/0029VaZVwso84Om3u2Bnqd1m"
           },
           "websiteVanHetJaar": {
-            "enabled": true,
+            "enabled": false,
             "heading": "Stem op Metro en win bol.com-tegoed",
             "subtext": "Help ons Website van het Jaar 2026 te worden.",
             "buttonLabel": "Stem nu",
@@ -99,6 +106,13 @@
             "subtext": "Must-reads, winacties en uitnodigingen voor onze events. Op WhatsApp hoor jij het als eerste van ons.",
             "buttonLabel": "Volg NSMBL",
             "url": "https://whatsapp.com/channel/0029Vb8UXJP4dTnKYrQy590u"
+          },
+          "websiteVanHetJaar": {
+            "enabled": false,
+            "heading": "Stem op NSMBL en win bol.com-tegoed",
+            "subtext": "Help ons Website van het Jaar 2026 te worden.",
+            "buttonLabel": "Stem nu",
+            "url": "https://www.websitevhjaar.nl/participants/nsmbl"
           }
         }
       },
@@ -113,6 +127,13 @@
             "subtext": "Maak ons je voorkeursbron, dan zie je het beste altijd bovenaan.",
             "buttonLabel": "Instellen →",
             "query": "manners.nl"
+          },
+          "websiteVanHetJaar": {
+            "enabled": false,
+            "heading": "Stem op Manners en win bol.com-tegoed",
+            "subtext": "Help ons Website van het Jaar 2026 te worden.",
+            "buttonLabel": "Stem nu",
+            "url": "https://www.websitevhjaar.nl/participants/manners"
           }
         }
       },
