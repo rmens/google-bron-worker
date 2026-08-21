@@ -171,7 +171,7 @@ class ParagraphInjector {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const site = lookupSite(env.SITES, url.hostname);
+    const site = lookupSite(env.SITES, url.hostname, env.NEWSLETTERS);
 
     if (site?.enabled && site.variants.newsletter) {
       if (url.pathname === NEWSLETTER_SCRIPT_PATH && request.method === "GET") {

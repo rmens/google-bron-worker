@@ -3,10 +3,15 @@
 
 import { subscribeWithEchobox } from "./echobox";
 import { esc } from "./injected-block";
-import { NEWSLETTER_SUBSCRIBED_COOKIE, type SiteConfig } from "./sites";
+import {
+  NEWSLETTER_SUBSCRIBED_COOKIE,
+  type NewsletterConfig,
+  type SiteConfig,
+} from "./sites";
 
 export interface Env {
   SITES: Record<string, SiteConfig>;
+  NEWSLETTERS: Record<string, NewsletterConfig>;
   [binding: string]: unknown;
 }
 

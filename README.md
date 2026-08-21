@@ -11,7 +11,8 @@ per pageview met gelijke kans gekozen.
 
 De Worker draait als route vóór de origin van elke geconfigureerde zone:
 
-1. De host wordt opgezocht in `vars.SITES` in
+1. De host wordt opgezocht in `vars.SITES` en gecombineerd met de eventuele
+   nieuwsbriefconfiguratie uit `vars.NEWSLETTERS` in
    [`wrangler.jsonc`](wrangler.jsonc) (een leidende `www.` wordt genegeerd).
    Onbekende hosts gaan ongewijzigd door.
 2. Requests op de klikpaden krijgen een `302`: `/__google-aanjager/click` naar
@@ -123,10 +124,12 @@ Na een geslaagde inschrijving zet de Worker een jaar lang een cookie
 (`__aanjager-newsletter-subscribed`), zodat die bezoeker de nieuwsbriefvariant niet meer
 te zien krijgt en terugvalt op de overige varianten.
 
-Voeg onder `variants` een nieuwsbriefconfig toe:
+Voeg onder `vars.NEWSLETTERS` een nieuwsbriefconfig toe met het geregistreerde
+domein als sleutel. De aparte binding houdt zowel de site- als
+nieuwsbriefconfiguratie onder Cloudflares limiet van 5 KiB per binding:
 
 ```jsonc
-"newsletter": {
+"voorbeeld.nl": {
   "enabled": true,
   "heading": "Elke dag het beste van Voorbeeld",
   "subtext": "Ontvang het laatste nieuws direct in je inbox.",
@@ -143,6 +146,9 @@ ze als Cloudflare-secrets. De prefix uit de siteconfig bepaalt de bindingsnamen:
 npx wrangler secret put ECHOBOX_VOORBEELD_CLIENT_ID
 npx wrangler secret put ECHOBOX_VOORBEELD_REFRESH_TOKEN
 ```
+
+Declareer beide namen ook onder `secrets.required` in `wrangler.jsonc`, zodat
+Wrangler een upload of deploy weigert als een binding ontbreekt.
 
 Voor lokaal gebruik kun je `.dev.vars.example` kopiëren naar `.dev.vars` en de
 waarden invullen. `.dev.vars` staat in `.gitignore` en mag niet worden gecommit.

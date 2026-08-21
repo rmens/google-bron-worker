@@ -59,6 +59,13 @@ class TokenStore<T extends { expiresAt: number }> {
 const identityTokens = new TokenStore<IdentityTokens>();
 const clientServiceTokens = new TokenStore<ClientServiceToken>();
 
+// De client-ID is voor meerdere properties gelijk; de refresh token maakt de
+// credentials uniek. Zonder beide delen kan een property een token uit de
+// cache van een andere property hergebruiken.
+function credentialCacheKey(credentials: EchoboxCredentials): string {
+  return `${credentials.clientId}\0${credentials.refreshToken}`;
+}
+
 function fetchWithTimeout(input: string, init: RequestInit): Promise<Response> {
   return fetch(input, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
 }
@@ -102,7 +109,7 @@ function getIdentityTokens(
   credentials: EchoboxCredentials,
   forceRefresh = false,
 ): Promise<IdentityTokens> {
-  const key = credentials.clientId;
+  const key = credentialCacheKey(credentials);
   if (forceRefresh) {
     identityTokens.delete(key);
     clientServiceTokens.delete(key);
@@ -155,7 +162,7 @@ function getClientServiceToken(
   credentials: EchoboxCredentials,
   forceRefresh = false,
 ): Promise<ClientServiceToken> {
-  const key = credentials.clientId;
+  const key = credentialCacheKey(credentials);
   if (forceRefresh) clientServiceTokens.delete(key);
   return clientServiceTokens.get(key, () => createClientServiceToken(credentials));
 }
