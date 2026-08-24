@@ -101,7 +101,7 @@
             "query": "nsmbl.nl"
           },
           "whatsapp": {
-            "enabled": false,
+            "enabled": true,
             "heading": "Join NSMBL op WhatsApp 👀",
             "subtext": "Must-reads, winacties en uitnodigingen voor onze events. Op WhatsApp hoor jij het als eerste van ons.",
             "buttonLabel": "Volg NSMBL",
