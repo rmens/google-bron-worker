@@ -174,7 +174,11 @@ export default {
     const site = lookupSite(env.SITES, url.hostname, env.NEWSLETTERS);
 
     if (site?.enabled && site.variants.newsletter) {
-      if (url.pathname === NEWSLETTER_SCRIPT_PATH && request.method === "GET") {
+      if (
+        site.variants.newsletter.enabled &&
+        url.pathname === NEWSLETTER_SCRIPT_PATH &&
+        request.method === "GET"
+      ) {
         return new Response(NEWSLETTER_CLIENT_SCRIPT, {
           headers: {
             "cache-control": "public, max-age=86400",

@@ -131,7 +131,9 @@ export async function handleNewsletterSubscription(
   };
 
   const newsletter = site.variants.newsletter;
-  if (!newsletter) return respond({ ok: false, message: "Niet gevonden." }, 404);
+  if (!newsletter?.enabled) {
+    return respond({ ok: false, message: "Niet gevonden." }, 404);
+  }
 
   if (hasInvalidOrigin(request, expectedOrigin)) {
     return respond({ ok: false, message: "Ongeldige aanvraag." }, 403);
