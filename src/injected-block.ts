@@ -288,21 +288,6 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
   });
 }
 
-// De uitkomst is deterministisch per (site, variant); bouw hem dus maar eenmaal
-// per isolate in plaats van op elke pageview.
-const htmlCache = new Map<SiteConfig, Map<Variant, string>>();
-
 export function buildInjectedHtml(site: SiteConfig, variant: Variant): string {
-  let bySite = htmlCache.get(site);
-  if (!bySite) {
-    bySite = new Map();
-    htmlCache.set(site, bySite);
-  }
-
-  let html = bySite.get(variant);
-  if (html === undefined) {
-    html = renderVariant(site, variant);
-    bySite.set(variant, html);
-  }
-  return html;
+  return renderVariant(site, variant);
 }
