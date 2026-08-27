@@ -18,7 +18,7 @@ interface LinkedCtaConfig extends VariantConfig {
 
 interface WebsiteVanHetJaarConfig extends LinkedCtaConfig {
   /** Sitespecifiek campagne-icoon; standaard is de gedeelde kroon. */
-  icon?: "crown" | "metro-globe";
+  icon?: "crown" | "metro-globe" | "culy" | "manners" | "nsmbl";
 }
 
 interface NewsletterConfig extends VariantConfig {
