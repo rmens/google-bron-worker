@@ -139,7 +139,7 @@ const STYLE = `<style>
   width:36px;height:36px
 }
 .aanjager-cta--website-van-het-jaar .aanjager-g .aanjager-wvhj-icon--nsmbl{
-  width:16px;height:16px
+  width:20px;height:20px
 }
 .aanjager-cta--newsletter .aanjager-btn,
 .aanjager-cta--website-van-het-jaar .aanjager-btn{
