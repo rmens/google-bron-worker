@@ -3,7 +3,7 @@ import {
   buildInjectedHtml,
   type Variant,
 } from "./injected-block";
-import { handleNewsletterSubscription, type Env } from "./newsletter";
+import { handleNewsletterSubscription } from "./newsletter";
 import {
   BLOCK_SELECTOR,
   GOOGLE_CLICK_PATH,
@@ -13,6 +13,7 @@ import {
   WEBSITE_VAN_HET_JAAR_CLICK_PATH,
   WHATSAPP_CLICK_PATH,
   lookupSite,
+  type Env,
   type SiteConfig,
 } from "./sites";
 
@@ -71,12 +72,10 @@ function chooseVariant(
   if (site.variants.google?.enabled) variants.push("google");
   if (site.variants.whatsapp?.enabled) variants.push("whatsapp");
   // Wie zich via dit blok al heeft ingeschreven, krijgt de nieuwsbrief niet meer.
-  const subscribed = hasCookie(
-    cookieHeader,
-    NEWSLETTER_SUBSCRIBED_COOKIE,
-    "1",
-  );
-  if (site.variants.newsletter?.enabled && !subscribed) {
+  if (
+    site.variants.newsletter?.enabled &&
+    !hasCookie(cookieHeader, NEWSLETTER_SUBSCRIBED_COOKIE, "1")
+  ) {
     variants.push("newsletter");
   }
   if (site.variants.websiteVanHetJaar?.enabled) {
@@ -87,9 +86,12 @@ function chooseVariant(
 }
 
 function hasNoPromoTag(script: string): boolean {
-  return [...script.matchAll(DATALAYER_TAGS_PATTERN)].some(([, tags]) =>
-    tags.split(",").some((tag) => tag.trim().toLowerCase() === NO_PROMO_TAG)
-  );
+  for (const [, tags] of script.matchAll(DATALAYER_TAGS_PATTERN)) {
+    if (tags.split(",").some((tag) => tag.trim().toLowerCase() === NO_PROMO_TAG)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 class InjectionEligibilityDetector {
@@ -128,8 +130,8 @@ class InjectionEligibilityDetector {
 }
 
 // Injecteert het blok vóór het eerste element ná de eerste echte alinea, dus
-// niet ónder een kop. Een "In het kort"-samenvatting telt niet als alinea, en
-// artikelen met maar één alinea krijgen niets.
+// niet ónder een kop. Een "In het kort"-samenvatting telt niet als alinea
+// ("⚡" is WANT's huisstijl daarvoor), en artikelen met maar één alinea krijgen niets.
 class ParagraphInjector {
   private injected = false;
   private seenParagraph = false;

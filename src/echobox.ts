@@ -110,11 +110,20 @@ function getIdentityTokens(
   forceRefresh = false,
 ): Promise<IdentityTokens> {
   const key = credentialCacheKey(credentials);
-  if (forceRefresh) {
-    identityTokens.delete(key);
-    clientServiceTokens.delete(key);
-  }
+  if (forceRefresh) identityTokens.delete(key);
   return identityTokens.get(key, () => requestIdentityTokens(credentials));
+}
+
+// Eén nieuwe poging met verse tokens wanneer Echobox de vorige met 401 afwijst.
+async function sendWithFreshTokenOn401<T>(
+  getToken: (forceRefresh?: boolean) => Promise<T>,
+  send: (token: T) => Promise<Response>,
+): Promise<Response> {
+  let response = await send(await getToken());
+  if (response.status === 401) {
+    response = await send(await getToken(true));
+  }
+  return response;
 }
 
 async function requestClientServiceToken(
@@ -134,13 +143,10 @@ async function requestClientServiceToken(
 async function createClientServiceToken(
   credentials: EchoboxCredentials,
 ): Promise<ClientServiceToken> {
-  let identity = await getIdentityTokens(credentials);
-  let response = await requestClientServiceToken(identity);
-
-  if (response.status === 401) {
-    identity = await getIdentityTokens(credentials, true);
-    response = await requestClientServiceToken(identity);
-  }
+  const response = await sendWithFreshTokenOn401(
+    (forceRefresh) => getIdentityTokens(credentials, forceRefresh),
+    requestClientServiceToken,
+  );
 
   if (!response.ok) {
     throw new Error(`Echobox-serviceauth gaf HTTP ${response.status}`);
@@ -189,13 +195,10 @@ export async function subscribeWithEchobox(
   campaignUrn: string,
   email: string,
 ): Promise<void> {
-  let token = await getClientServiceToken(credentials);
-  let response = await sendSubscription(campaignUrn, email, token);
-
-  if (response.status === 401) {
-    token = await getClientServiceToken(credentials, true);
-    response = await sendSubscription(campaignUrn, email, token);
-  }
+  const response = await sendWithFreshTokenOn401(
+    (forceRefresh) => getClientServiceToken(credentials, forceRefresh),
+    (token) => sendSubscription(campaignUrn, email, token),
+  );
 
   if (!response.ok) {
     throw new Error(`Echobox-inschrijving gaf HTTP ${response.status}`);

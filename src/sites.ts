@@ -1,13 +1,10 @@
 // Types en gedeelde paden voor de siteconfiguratie in wrangler.jsonc.
 
-interface CtaCopy {
+interface VariantConfig {
+  enabled: boolean;
   heading: string;
   subtext: string;
   buttonLabel: string;
-}
-
-interface VariantConfig extends CtaCopy {
-  enabled: boolean;
 }
 
 interface GoogleConfig extends VariantConfig {
@@ -45,6 +42,13 @@ export interface SiteConfig {
   /** "dark" voor sites met een donkere achtergrond (bijv. Manners). */
   theme?: "light" | "dark";
   variants: SiteVariants;
+}
+
+export interface Env {
+  SITES: Record<string, SiteConfig>;
+  NEWSLETTERS: Record<string, NewsletterConfig>;
+  /** Echobox-secrets, opgezocht via NewsletterConfig.credentialBindingPrefix. */
+  [binding: string]: unknown;
 }
 
 // De Instellen-knop linkt hierheen; het "__"-prefix voorkomt verwarring met een artikel.
