@@ -1,3 +1,4 @@
+import { SITES } from "./config";
 import {
   NEWSLETTER_CLIENT_SCRIPT,
   buildInjectedHtml,
@@ -173,7 +174,7 @@ class ParagraphInjector {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const site = lookupSite(env.SITES, url.hostname, env.NEWSLETTERS);
+    const site = lookupSite(SITES, url.hostname);
 
     if (site?.enabled && site.variants.newsletter) {
       if (

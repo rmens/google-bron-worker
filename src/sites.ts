@@ -1,4 +1,4 @@
-// Types en gedeelde paden voor de siteconfiguratie in wrangler.jsonc.
+// Types en gedeelde paden voor de siteconfiguratie in src/config.ts.
 
 interface VariantConfig {
   enabled: boolean;
@@ -45,8 +45,6 @@ export interface SiteConfig {
 }
 
 export interface Env {
-  SITES: Record<string, SiteConfig>;
-  NEWSLETTERS: Record<string, NewsletterConfig>;
   /** Echobox-secrets, opgezocht via NewsletterConfig.credentialBindingPrefix. */
   [binding: string]: unknown;
 }
@@ -78,15 +76,6 @@ export const BLOCK_SELECTOR = 'article.single[data-type="post"] > *';
 export function lookupSite(
   sites: Record<string, SiteConfig>,
   hostname: string,
-  newsletters?: Record<string, NewsletterConfig>,
 ): SiteConfig | undefined {
-  const normalizedHostname = hostname.replace(/^www\./, "").toLowerCase();
-  const site = sites[normalizedHostname];
-  const newsletter = newsletters?.[normalizedHostname];
-  if (!site || !newsletter) return site;
-
-  return {
-    ...site,
-    variants: { ...site.variants, newsletter },
-  };
+  return sites[hostname.replace(/^www\./, "").toLowerCase()];
 }
