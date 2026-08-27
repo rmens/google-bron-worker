@@ -3,15 +3,10 @@
 
 import { subscribeWithEchobox } from "./echobox";
 import { esc } from "./injected-block";
-import {
-  NEWSLETTER_SUBSCRIBED_COOKIE,
-  type NewsletterConfig,
-  type SiteConfig,
-} from "./sites";
+import { NEWSLETTER_SUBSCRIBED_COOKIE, type SiteConfig } from "./sites";
 
 export interface Env {
-  SITES: Record<string, SiteConfig>;
-  NEWSLETTERS: Record<string, NewsletterConfig>;
+  /** Echobox-secrets, opgezocht via NewsletterConfig.credentialBindingPrefix. */
   [binding: string]: unknown;
 }
 
@@ -70,9 +65,9 @@ function htmlResponse(message: string, status: number, backUrl?: string): Respon
 async function readBodyWithLimit(
   request: Request,
   maxBytes: number,
-): Promise<Uint8Array | null> {
+): Promise<Blob | null> {
   const reader = request.body?.getReader();
-  if (!reader) return new Uint8Array(0);
+  if (!reader) return new Blob([]);
 
   const chunks: Uint8Array[] = [];
   let total = 0;
@@ -87,13 +82,7 @@ async function readBodyWithLimit(
     chunks.push(value);
   }
 
-  const body = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    body.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return body;
+  return new Blob(chunks);
 }
 
 function readSecret(env: Env, name: string): string | undefined {

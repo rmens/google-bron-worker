@@ -215,6 +215,10 @@ interface CtaContent {
   trailingHtml?: string;
 }
 
+function ctaButton(href: string, label: string): string {
+  return `<a class="aanjager-btn" href="${href}" target="_blank" rel="noopener">${esc(label)}</a>`;
+}
+
 // Gedeelde schil (stijl, wrapper, icoon, copy); per variant alleen de invulling.
 function renderCta(site: SiteConfig, content: CtaContent): string {
   const darkCls = site.theme === "dark" ? " aanjager-cta--dark" : "";
@@ -227,7 +231,7 @@ function renderCta(site: SiteConfig, content: CtaContent): string {
 ${content.trailingHtml ?? ""}`;
 }
 
-function renderVariant(site: SiteConfig, variant: Variant): string {
+export function buildInjectedHtml(site: SiteConfig, variant: Variant): string {
   if (variant === "website-van-het-jaar" && site.variants.websiteVanHetJaar) {
     const websiteVanHetJaar = site.variants.websiteVanHetJaar;
     return renderCta(site, {
@@ -238,7 +242,10 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
         : WEBSITE_VAN_HET_JAAR_CROWN_ICON,
       heading: websiteVanHetJaar.heading,
       subtext: websiteVanHetJaar.subtext,
-      actionHtml: `<a class="aanjager-btn" href="${WEBSITE_VAN_HET_JAAR_CLICK_PATH}" target="_blank" rel="noopener">${esc(websiteVanHetJaar.buttonLabel)}</a>`,
+      actionHtml: ctaButton(
+        WEBSITE_VAN_HET_JAAR_CLICK_PATH,
+        websiteVanHetJaar.buttonLabel,
+      ),
     });
   }
 
@@ -250,7 +257,7 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
       svg: WHATSAPP_SVG,
       heading: wa.heading,
       subtext: wa.subtext,
-      actionHtml: `<a class="aanjager-btn" href="${WHATSAPP_CLICK_PATH}" target="_blank" rel="noopener">${esc(wa.buttonLabel)}</a>`,
+      actionHtml: ctaButton(WHATSAPP_CLICK_PATH, wa.buttonLabel),
     });
   }
 
@@ -273,21 +280,18 @@ function renderVariant(site: SiteConfig, variant: Variant): string {
     });
   }
 
-  const google = site.variants.google;
-  if (!google) {
-    throw new Error(`Google-variant ontbreekt voor ${site.name}`);
+  if (variant === "google" && site.variants.google) {
+    const google = site.variants.google;
+    return renderCta(site, {
+      modifierCls: "",
+      ariaLabel: `Maak ${site.name} een voorkeursbron in Google`,
+      svg: GOOGLE_SVG,
+      heading: google.heading,
+      subtext: google.subtext,
+      actionHtml: ctaButton(GOOGLE_CLICK_PATH, google.buttonLabel),
+    });
   }
 
-  return renderCta(site, {
-    modifierCls: "",
-    ariaLabel: `Maak ${site.name} een voorkeursbron in Google`,
-    svg: GOOGLE_SVG,
-    heading: google.heading,
-    subtext: google.subtext,
-    actionHtml: `<a class="aanjager-btn" href="${GOOGLE_CLICK_PATH}" target="_blank" rel="noopener">${esc(google.buttonLabel)}</a>`,
-  });
-}
-
-export function buildInjectedHtml(site: SiteConfig, variant: Variant): string {
-  return renderVariant(site, variant);
+  // index.ts vangt dit op en serveert dan de originpagina ongewijzigd.
+  throw new Error(`Variant ${variant} ontbreekt voor ${site.name}`);
 }

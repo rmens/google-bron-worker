@@ -1,13 +1,10 @@
-// Types en gedeelde paden voor de siteconfiguratie in wrangler.jsonc.
+// Types en gedeelde paden voor de siteconfiguratie in src/config.ts.
 
-interface CtaCopy {
+interface VariantConfig {
+  enabled: boolean;
   heading: string;
   subtext: string;
   buttonLabel: string;
-}
-
-interface VariantConfig extends CtaCopy {
-  enabled: boolean;
 }
 
 interface GoogleConfig extends VariantConfig {
@@ -24,7 +21,7 @@ interface WebsiteVanHetJaarConfig extends LinkedCtaConfig {
   icon?: "crown" | "metro-globe";
 }
 
-export interface NewsletterConfig extends VariantConfig {
+interface NewsletterConfig extends VariantConfig {
   /** Echobox-campagne, bijv. urn:newsletter:campaign:UUID. */
   campaignUrn: string;
   /** Prefix van de Cloudflare-secrets: <prefix>_CLIENT_ID en <prefix>_REFRESH_TOKEN. */
@@ -69,20 +66,3 @@ export const NEWSLETTER_SUBSCRIBED_COOKIE = "__aanjager-newsletter-subscribed";
 
 // Alle directe kinderen van een post-article (niet recepten: data-type="recipe").
 export const BLOCK_SELECTOR = 'article.single[data-type="post"] > *';
-
-/** Zoekt de config voor een host op; normaliseert een leidende "www.". */
-export function lookupSite(
-  sites: Record<string, SiteConfig>,
-  hostname: string,
-  newsletters?: Record<string, NewsletterConfig>,
-): SiteConfig | undefined {
-  const normalizedHostname = hostname.replace(/^www\./, "").toLowerCase();
-  const site = sites[normalizedHostname];
-  const newsletter = newsletters?.[normalizedHostname];
-  if (!site || !newsletter) return site;
-
-  return {
-    ...site,
-    variants: { ...site.variants, newsletter },
-  };
-}

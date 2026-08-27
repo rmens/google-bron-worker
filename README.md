@@ -11,10 +11,8 @@ per pageview met gelijke kans gekozen.
 
 De Worker draait als route vóór de origin van elke geconfigureerde zone:
 
-1. De host wordt opgezocht in `vars.SITES` en gecombineerd met de eventuele
-   nieuwsbriefconfiguratie uit `vars.NEWSLETTERS` in
-   [`wrangler.jsonc`](wrangler.jsonc) (een leidende `www.` wordt genegeerd).
-   Onbekende hosts gaan ongewijzigd door.
+1. De host wordt opgezocht in `SITES` in [`src/config.ts`](src/config.ts)
+   (een leidende `www.` wordt genegeerd). Onbekende hosts gaan ongewijzigd door.
 2. Requests op de klikpaden krijgen een `302`: `/__google-aanjager/click` naar
    de Google-voorkeursbron van die site, `/__aanjager/click-whatsapp` naar het
    WhatsApp-kanaal en `/__aanjager/click-website-van-het-jaar` naar de
@@ -39,28 +37,30 @@ geladen.
 
 ## Een site toevoegen
 
-Alle site- en routeconfiguratie staat in [`wrangler.jsonc`](wrangler.jsonc).
+De siteconfiguratie staat in [`src/config.ts`](src/config.ts); de routes staan
+in [`wrangler.jsonc`](wrangler.jsonc). `npm run typecheck` valideert de vorm van
+de configuratie.
 
-1. Voeg onder `vars.SITES` een entry toe met als sleutel het geregistreerde
-   domein zonder `www.`:
+1. Voeg in `SITES` in `src/config.ts` een entry toe met als sleutel het
+   geregistreerde domein zonder `www.`:
 
-   ```jsonc
+   ```ts
    "voorbeeld.nl": {
-     "enabled": true,
-     "name": "Voorbeeld",
-     "variants": {
-       "google": {
-         "enabled": true,
-         "heading": "Voorbeeld bovenaan in Google?",
-         "subtext": "…",
-         "buttonLabel": "Instellen →",
-         "query": "voorbeeld.nl"
-       }
-     }
+     enabled: true,
+     name: "Voorbeeld",
+     variants: {
+       google: {
+         enabled: true,
+         heading: "Voorbeeld bovenaan in Google?",
+         subtext: "…",
+         buttonLabel: "Instellen →",
+         query: "voorbeeld.nl",
+       },
+     },
    },
    ```
 
-2. Voeg in hetzelfde bestand een route toe voor iedere host waarop de Worker
+2. Voeg in `wrangler.jsonc` een route toe voor iedere host waarop de Worker
    moet draaien, bijvoorbeeld apex en/of `www`.
 3. Verifieer dat artikelen de gedeelde selector
    `article.single[data-type="post"] > *` gebruiken. Een site met een afwijkende
@@ -78,13 +78,13 @@ logo's staan in [`src/injected-block.ts`](src/injected-block.ts).
 Geef een site onder `variants` een `whatsapp`-config om die variant toe te voegen
 (zelfde opmaak, groene knop en WhatsApp-logo):
 
-```jsonc
-"whatsapp": {
-  "enabled": true,
-  "heading": "Volg Voorbeeld op WhatsApp",
-  "subtext": "…",
-  "buttonLabel": "Volgen →",
-  "url": "https://whatsapp.com/channel/…"
+```ts
+whatsapp: {
+  enabled: true,
+  heading: "Volg Voorbeeld op WhatsApp",
+  subtext: "…",
+  buttonLabel: "Volgen →",
+  url: "https://whatsapp.com/channel/…",
 },
 ```
 
@@ -98,14 +98,14 @@ sitespecifieke icoonkeuze blijven in de siteconfig staan; de SVG-assets staan in
 `src/injected-block.ts`. De styling gebruikt de `--fw3-button-*`-tokens van
 de actieve site, met `--fw3-secondary` als fallback voor de huisstijlkleur.
 
-```jsonc
-"websiteVanHetJaar": {
-  "enabled": false,
-  "heading": "Stem op Voorbeeld. Win bol.com-tegoed.",
-  "subtext": "Samen maken we Voorbeeld Website van het Jaar 2026.",
-  "buttonLabel": "Stem nu",
-  "url": "https://www.websitevhjaar.nl/participants/voorbeeld",
-  "icon": "crown"
+```ts
+websiteVanHetJaar: {
+  enabled: false,
+  heading: "Stem op Voorbeeld. Win bol.com-tegoed.",
+  subtext: "Samen maken we Voorbeeld Website van het Jaar 2026.",
+  buttonLabel: "Stem nu",
+  url: "https://www.websitevhjaar.nl/participants/voorbeeld",
+  icon: "crown",
 },
 ```
 
@@ -124,18 +124,16 @@ Na een geslaagde inschrijving zet de Worker een jaar lang een cookie
 (`__aanjager-newsletter-subscribed`), zodat die bezoeker de nieuwsbriefvariant niet meer
 te zien krijgt en terugvalt op de overige varianten.
 
-Voeg onder `vars.NEWSLETTERS` een nieuwsbriefconfig toe met het geregistreerde
-domein als sleutel. De aparte binding houdt zowel de site- als
-nieuwsbriefconfiguratie onder Cloudflares limiet van 5 KiB per binding:
+Geef de site in `src/config.ts` onder `variants` een `newsletter`-config:
 
-```jsonc
-"voorbeeld.nl": {
-  "enabled": true,
-  "heading": "Elke dag het beste van Voorbeeld",
-  "subtext": "Ontvang het laatste nieuws direct in je inbox.",
-  "buttonLabel": "Inschrijven",
-  "campaignUrn": "urn:newsletter:campaign:UUID-UIT-ECHOBOX",
-  "credentialBindingPrefix": "ECHOBOX_VOORBEELD"
+```ts
+newsletter: {
+  enabled: true,
+  heading: "Elke dag het beste van Voorbeeld",
+  subtext: "Ontvang het laatste nieuws direct in je inbox.",
+  buttonLabel: "Inschrijven",
+  campaignUrn: "urn:newsletter:campaign:UUID-UIT-ECHOBOX",
+  credentialBindingPrefix: "ECHOBOX_VOORBEELD",
 },
 ```
 
