@@ -20,10 +20,6 @@ interface InjectionState {
   blocked: boolean;
 }
 
-// In de huidige datalayer betekent show_banners: 0 dat banners verborgen zijn.
-// Ondersteun ook de expliciete inverse vlag, mocht een site die gebruiken.
-const HIDDEN_BANNERS_PATTERN =
-  /(?:["']?show_banners["']?\s*:\s*(?:0|false|["'](?:0|false)["'])|["']?hide_banners["']?\s*:\s*(?:1|true|["'](?:1|true)["']))(?=\s*[,}])/i;
 const DATALAYER_NAME_PATTERN = /\bdataLayer\b/;
 const DATALAYER_TAGS_PATTERN = /["']?Tags["']?\s*:\s*["']([^"']*)["']/gi;
 const NO_PROMO_TAG = "nopromo";
@@ -96,7 +92,6 @@ function hasNoPromoTag(script: string): boolean {
 class InjectionEligibilityDetector {
   private tail = "";
   private dataLayerFound = false;
-  private hiddenBannersFound = false;
   private noPromoTagFound = false;
 
   constructor(private readonly state: InjectionState) {}
@@ -104,7 +99,6 @@ class InjectionEligibilityDetector {
   element(): void {
     this.tail = "";
     this.dataLayerFound = false;
-    this.hiddenBannersFound = false;
     this.noPromoTagFound = false;
   }
 
@@ -113,13 +107,9 @@ class InjectionEligibilityDetector {
 
     const text = this.tail + chunk.text;
     this.dataLayerFound ||= DATALAYER_NAME_PATTERN.test(text);
-    this.hiddenBannersFound ||= HIDDEN_BANNERS_PATTERN.test(text);
     this.noPromoTagFound ||= hasNoPromoTag(text);
 
-    if (
-      this.dataLayerFound &&
-      (this.hiddenBannersFound || this.noPromoTagFound)
-    ) {
+    if (this.dataLayerFound && this.noPromoTagFound) {
       this.state.blocked = true;
       return;
     }
