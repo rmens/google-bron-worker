@@ -280,8 +280,8 @@ export function buildInjectedHtml(site: SiteConfig, variant: Variant): string {
     });
   }
 
-  const google = site.variants.google;
-  if (variant === "google" && google) {
+  if (variant === "google" && site.variants.google) {
+    const google = site.variants.google;
     return renderCta(site, {
       modifierCls: "",
       ariaLabel: `Maak ${site.name} een voorkeursbron in Google`,

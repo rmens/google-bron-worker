@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository contains one TypeScript Cloudflare Worker. `src/index.ts` is the request handler and streaming `HTMLRewriter` integration. `src/config.ts` is the single source for supported domains, CTA copy, and themes; `wrangler.jsonc` holds the Cloudflare routes and secret declarations. `src/sites.ts` defines the corresponding types, shared paths, and hostname lookup. `src/injected-block.ts` builds the injected HTML, CSS, and SVG assets. Keep site-specific data in `src/config.ts` and shared presentation in `injected-block.ts`.
+This repository contains one TypeScript Cloudflare Worker. `src/index.ts` is the request handler and streaming `HTMLRewriter` integration. `src/config.ts` is the single source for supported domains, CTA copy, and themes, plus the hostname lookup; `wrangler.jsonc` holds the Cloudflare routes and secret declarations. `src/sites.ts` defines the corresponding types and shared paths. `src/injected-block.ts` builds the injected HTML, CSS, and SVG assets. Keep site-specific data in `src/config.ts` and shared presentation in `injected-block.ts`.
 
 Cloudflare routes and runtime settings live in `wrangler.jsonc`; compiler rules live in `tsconfig.json`. There is currently no dedicated test directory or generated build output checked into the repository.
 

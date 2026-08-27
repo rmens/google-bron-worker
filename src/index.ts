@@ -1,10 +1,10 @@
-import { SITES } from "./config";
+import { lookupSite } from "./config";
 import {
   NEWSLETTER_CLIENT_SCRIPT,
   buildInjectedHtml,
   type Variant,
 } from "./injected-block";
-import { handleNewsletterSubscription } from "./newsletter";
+import { handleNewsletterSubscription, type Env } from "./newsletter";
 import {
   BLOCK_SELECTOR,
   GOOGLE_CLICK_PATH,
@@ -13,8 +13,6 @@ import {
   NEWSLETTER_SUBSCRIBED_COOKIE,
   WEBSITE_VAN_HET_JAAR_CLICK_PATH,
   WHATSAPP_CLICK_PATH,
-  lookupSite,
-  type Env,
   type SiteConfig,
 } from "./sites";
 
@@ -174,7 +172,7 @@ class ParagraphInjector {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const site = lookupSite(SITES, url.hostname);
+    const site = lookupSite(url.hostname);
 
     if (site?.enabled && site.variants.newsletter) {
       if (

@@ -239,3 +239,9 @@ export const SITES = {
     },
   },
 } satisfies Record<string, SiteConfig>;
+
+/** Zoekt de config voor een host op; normaliseert een leidende "www.". */
+export function lookupSite(hostname: string): SiteConfig | undefined {
+  const sites: Record<string, SiteConfig> = SITES;
+  return sites[hostname.replace(/^www\./, "").toLowerCase()];
+}

@@ -21,7 +21,7 @@ interface WebsiteVanHetJaarConfig extends LinkedCtaConfig {
   icon?: "crown" | "metro-globe";
 }
 
-export interface NewsletterConfig extends VariantConfig {
+interface NewsletterConfig extends VariantConfig {
   /** Echobox-campagne, bijv. urn:newsletter:campaign:UUID. */
   campaignUrn: string;
   /** Prefix van de Cloudflare-secrets: <prefix>_CLIENT_ID en <prefix>_REFRESH_TOKEN. */
@@ -42,11 +42,6 @@ export interface SiteConfig {
   /** "dark" voor sites met een donkere achtergrond (bijv. Manners). */
   theme?: "light" | "dark";
   variants: SiteVariants;
-}
-
-export interface Env {
-  /** Echobox-secrets, opgezocht via NewsletterConfig.credentialBindingPrefix. */
-  [binding: string]: unknown;
 }
 
 // De Instellen-knop linkt hierheen; het "__"-prefix voorkomt verwarring met een artikel.
@@ -71,11 +66,3 @@ export const NEWSLETTER_SUBSCRIBED_COOKIE = "__aanjager-newsletter-subscribed";
 
 // Alle directe kinderen van een post-article (niet recepten: data-type="recipe").
 export const BLOCK_SELECTOR = 'article.single[data-type="post"] > *';
-
-/** Zoekt de config voor een host op; normaliseert een leidende "www.". */
-export function lookupSite(
-  sites: Record<string, SiteConfig>,
-  hostname: string,
-): SiteConfig | undefined {
-  return sites[hostname.replace(/^www\./, "").toLowerCase()];
-}

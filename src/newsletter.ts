@@ -3,11 +3,12 @@
 
 import { subscribeWithEchobox } from "./echobox";
 import { esc } from "./injected-block";
-import {
-  NEWSLETTER_SUBSCRIBED_COOKIE,
-  type Env,
-  type SiteConfig,
-} from "./sites";
+import { NEWSLETTER_SUBSCRIBED_COOKIE, type SiteConfig } from "./sites";
+
+export interface Env {
+  /** Echobox-secrets, opgezocht via NewsletterConfig.credentialBindingPrefix. */
+  [binding: string]: unknown;
+}
 
 const MAX_SUBSCRIPTION_BODY_BYTES = 4_096;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
