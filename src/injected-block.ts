@@ -126,19 +126,19 @@ const STYLE = `<style>
 .aanjager-cta--website-van-het-jaar .aanjager-wvhj-icon--crown{
   transform:translateY(-2px)
 }
-.aanjager-cta--website-van-het-jaar .aanjager-wvhj-icon--metro{
+.aanjager-cta--website-van-het-jaar .aanjager-g .aanjager-wvhj-icon--metro{
   width:32px;height:32px
 }
-.aanjager-cta--website-van-het-jaar .aanjager-wvhj-icon--site{
+.aanjager-cta--website-van-het-jaar .aanjager-g .aanjager-wvhj-icon--site{
   width:30px;height:30px
 }
-.aanjager-cta--website-van-het-jaar .aanjager-wvhj-icon--culy{
+.aanjager-cta--website-van-het-jaar .aanjager-g .aanjager-wvhj-icon--culy{
   width:34px;height:34px
 }
-.aanjager-cta--website-van-het-jaar .aanjager-wvhj-icon--manners{
+.aanjager-cta--website-van-het-jaar .aanjager-g .aanjager-wvhj-icon--manners{
   width:36px;height:36px
 }
-.aanjager-cta--website-van-het-jaar .aanjager-wvhj-icon--nsmbl{
+.aanjager-cta--website-van-het-jaar .aanjager-g .aanjager-wvhj-icon--nsmbl{
   width:16px;height:16px
 }
 .aanjager-cta--newsletter .aanjager-btn,
