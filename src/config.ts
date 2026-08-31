@@ -73,7 +73,8 @@ export const SITES = {
       newsletter: {
         enabled: true,
         heading: "Het beste van Metro in je inbox",
-        subtext: "Elke dag onze nieuwsbrief met de mooiste verhalen.",
+        subtext:
+          "Elke doordeweekse dag onze nieuwsbrief met de mooiste verhalen.",
         buttonLabel: "Aanmelden",
         campaignUrn: "urn:newsletter:campaign:1bd150b3-65ce-408d-834e-eae58e5302db",
         credentialBindingPrefix: "ECHOBOX_METRO",
