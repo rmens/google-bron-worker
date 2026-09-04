@@ -1,43 +1,32 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
 
 import ts from "typescript";
 
+import {
+  GOOGLE_CLICK_PATH,
+  NEWSLETTER_SUBSCRIBE_PATH,
+  WEBSITE_VAN_HET_JAAR_CLICK_PATH,
+  WHATSAPP_CLICK_PATH,
+  lookupSite,
+} from "../src/sites.ts";
+
 const API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const GRAPHQL_URL = `${API_BASE_URL}/graphql`;
+const DAY_MS = 86_400_000;
+// Kortere vensters laten Cloudflare (ABR) een fijnere sampletabel kiezen dan
+// settings.maxDuration toestaat; dat verlaagt sampleInterval op deze dunne paden.
 const DEFAULT_CHUNK_SECONDS = 7 * 24 * 60 * 60;
+const REQUEST_TIMEOUT_MS = 30_000;
 
+// widget = variantsleutel in wrangler.jsonc; pad/methode/status = wat de Worker teruggeeft.
 const TRACKED_REQUESTS = [
-  {
-    path: "/__google-aanjager/click",
-    method: "GET",
-    status: 302,
-    widget: "google",
-    event: "clicks",
-  },
-  {
-    path: "/__aanjager/click-whatsapp",
-    method: "GET",
-    status: 302,
-    widget: "whatsapp",
-    event: "clicks",
-  },
-  {
-    path: "/__aanjager/click-website-van-het-jaar",
-    method: "GET",
-    status: 302,
-    widget: "website-van-het-jaar",
-    event: "clicks",
-  },
-  {
-    path: "/__aanjager/subscribe-newsletter",
-    method: "POST",
-    status: 200,
-    widget: "newsletter",
-    event: "inschrijvingen",
-  },
+  { widget: "google", path: GOOGLE_CLICK_PATH, method: "GET", status: 302, event: "clicks" },
+  { widget: "whatsapp", path: WHATSAPP_CLICK_PATH, method: "GET", status: 302, event: "clicks" },
+  { widget: "websiteVanHetJaar", path: WEBSITE_VAN_HET_JAAR_CLICK_PATH, method: "GET", status: 302, event: "clicks" },
+  { widget: "newsletter", path: NEWSLETTER_SUBSCRIBE_PATH, method: "POST", status: 200, event: "inschrijvingen" },
 ];
 
 const SETTINGS_QUERY = `
@@ -99,91 +88,42 @@ Vereist voor echte API-aanvragen: CLOUDFLARE_API_TOKEN.`);
 }
 
 function parseArguments(args) {
-  let month;
-  let csvPath;
-  let dryRun = false;
-  let lastWeek = false;
-  let includeBots = false;
-  let from;
-  let to;
-
-  for (let index = 0; index < args.length; index += 1) {
-    const argument = args[index];
-    if (argument === "--help" || argument === "-h") {
-      usage();
-      process.exit(0);
-    }
-    if (argument === "--dry-run") {
-      dryRun = true;
-      continue;
-    }
-    if (argument === "--last-week") {
-      lastWeek = true;
-      continue;
-    }
-    if (argument === "--include-bots") {
-      includeBots = true;
-      continue;
-    }
-    if (argument === "--from" || argument === "--to") {
-      const value = args[index + 1];
-      if (!value || value.startsWith("-")) {
-        throw new Error(`${argument} verwacht een datum in JJJJ-MM-DD.`);
-      }
-      if (argument === "--from") from = value;
-      if (argument === "--to") to = value;
-      index += 1;
-      continue;
-    }
-    if (argument === "--csv") {
-      csvPath = args[index + 1];
-      if (!csvPath || csvPath.startsWith("-")) {
-        throw new Error("--csv verwacht een bestandspad.");
-      }
-      index += 1;
-      continue;
-    }
-    if (argument.startsWith("-")) {
-      throw new Error(`Onbekende optie: ${argument}`);
-    }
-    if (month) throw new Error("Geef maximaal één maand op.");
-    month = argument;
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: {
+      help: { type: "boolean", short: "h" },
+      "dry-run": { type: "boolean" },
+      "last-week": { type: "boolean" },
+      "include-bots": { type: "boolean" },
+      from: { type: "string" },
+      to: { type: "string" },
+      csv: { type: "string" },
+    },
+  });
+  if (values.help) {
+    usage();
+    process.exit(0);
   }
+  if (positionals.length > 1) throw new Error("Geef maximaal één maand op.");
 
-  if ((from && !to) || (!from && to)) {
+  const [month] = positionals;
+  const { from, to } = values;
+  if ((from === undefined) !== (to === undefined)) {
     throw new Error("Gebruik --from en --to altijd samen.");
   }
-  const periodOptions =
-    Number(Boolean(month)) + Number(lastWeek) + Number(Boolean(from));
-  if (periodOptions > 1) {
+  if ([month, values["last-week"], from].filter((x) => x !== undefined).length > 1) {
     throw new Error("Combineer een maand, --last-week en --from/--to niet.");
   }
 
-  return { month, csvPath, dryRun, lastWeek, includeBots, from, to };
-}
-
-function previousMonth(now) {
-  const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1));
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
-function parseMonth(value, now = new Date()) {
-  const month = value ?? previousMonth(now);
-  const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(month);
-  if (!match) throw new Error(`Ongeldige maand: ${month}. Gebruik JJJJ-MM.`);
-
-  const year = Number(match[1]);
-  const monthIndex = Number(match[2]) - 1;
-  const start = new Date(Date.UTC(year, monthIndex, 1));
-  const calendarEnd = new Date(Date.UTC(year, monthIndex + 1, 1));
-  if (start >= now) throw new Error("De opgegeven maand ligt in de toekomst.");
-
-  const complete = calendarEnd <= now;
   return {
-    label: month,
-    start,
-    end: complete ? calendarEnd : now,
-    complete,
+    month,
+    from,
+    to,
+    csvPath: values.csv,
+    dryRun: values["dry-run"] ?? false,
+    lastWeek: values["last-week"] ?? false,
+    includeBots: values["include-bots"] ?? false,
   };
 }
 
@@ -191,77 +131,81 @@ function formatDate(date) {
   return date.toISOString().slice(0, 10);
 }
 
+function utcMidnight(now) {
+  return new Date(formatDate(now));
+}
+
+// Knipt [start, calendarEnd) af op nu en markeert of de periode al compleet is.
+function period(label, start, calendarEnd, now) {
+  if (start >= now) throw new Error(`${label} ligt in de toekomst.`);
+  const complete = calendarEnd <= now;
+  return { label, start, end: complete ? calendarEnd : now, complete };
+}
+
+function parseMonth(value, now) {
+  const month = value ??
+    new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1)).toISOString().slice(0, 7);
+  const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(month);
+  if (!match) throw new Error(`Ongeldige maand: ${month}. Gebruik JJJJ-MM.`);
+
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  return period(
+    month,
+    new Date(Date.UTC(year, monthIndex, 1)),
+    new Date(Date.UTC(year, monthIndex + 1, 1)),
+    now,
+  );
+}
+
 function parseUtcDate(value, option) {
   const match = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.exec(value);
   if (!match) throw new Error(`${option} verwacht JJJJ-MM-DD, kreeg ${value}.`);
 
-  const year = Number(match[1]);
-  const monthIndex = Number(match[2]) - 1;
-  const day = Number(match[3]);
-  const date = new Date(Date.UTC(year, monthIndex, day));
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== monthIndex ||
-    date.getUTCDate() !== day
-  ) {
+  // Date.UTC rolt 30 februari stilzwijgend door naar maart; controleer de terugvertaling.
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  if (formatDate(date) !== value) {
     throw new Error(`${option} bevat geen geldige kalenderdatum: ${value}.`);
   }
   return date;
 }
 
-function parseDateRange(from, to, now = new Date()) {
+function parseDateRange(from, to, now) {
   const start = parseUtcDate(from, "--from");
   const inclusiveEnd = parseUtcDate(to, "--to");
-  const today = new Date(Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-  ));
   if (inclusiveEnd < start) throw new Error("--to mag niet vóór --from liggen.");
-  if (start >= now) throw new Error("--from ligt in de toekomst.");
-  if (inclusiveEnd > today) throw new Error("--to ligt in de toekomst.");
-
-  const calendarEnd = new Date(inclusiveEnd.getTime() + 86_400_000);
-  const complete = calendarEnd <= now;
-  return {
-    label: `${from} t/m ${to}`,
+  if (inclusiveEnd > utcMidnight(now)) throw new Error("--to ligt in de toekomst.");
+  return period(
+    `${from} t/m ${to}`,
     start,
-    end: complete ? calendarEnd : now,
-    complete,
-  };
+    new Date(inclusiveEnd.getTime() + DAY_MS),
+    now,
+  );
 }
 
-function previousWeek(now = new Date()) {
-  const today = new Date(Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-  ));
+function previousWeek(now) {
+  const today = utcMidnight(now);
   const daysSinceMonday = (today.getUTCDay() + 6) % 7;
-  const currentMonday = new Date(today.getTime() - daysSinceMonday * 86_400_000);
-  const start = new Date(currentMonday.getTime() - 7 * 86_400_000);
-  const inclusiveEnd = new Date(currentMonday.getTime() - 86_400_000);
-  return {
-    label: `${formatDate(start)} t/m ${formatDate(inclusiveEnd)}`,
+  const currentMonday = new Date(today.getTime() - daysSinceMonday * DAY_MS);
+  const start = new Date(currentMonday.getTime() - 7 * DAY_MS);
+  const inclusiveEnd = new Date(currentMonday.getTime() - DAY_MS);
+  return period(
+    `${formatDate(start)} t/m ${formatDate(inclusiveEnd)}`,
     start,
-    end: currentMonday,
-    complete: true,
-  };
+    currentMonday,
+    now,
+  );
 }
 
 function selectPeriod(options, now = new Date()) {
   if (options.lastWeek) return previousWeek(now);
-  if (options.from && options.to) {
-    return parseDateRange(options.from, options.to, now);
-  }
+  if (options.from !== undefined) return parseDateRange(options.from, options.to, now);
   return parseMonth(options.month, now);
 }
 
 async function readWranglerConfig() {
-  const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
-  const configPath = path.resolve(scriptDirectory, "../wrangler.jsonc");
-  const source = await readFile(configPath, "utf8");
-  const parsed = ts.parseConfigFileTextToJson(configPath, source);
+  const source = await readFile(new URL("../wrangler.jsonc", import.meta.url), "utf8");
+  const parsed = ts.parseConfigFileTextToJson("wrangler.jsonc", source);
   if (parsed.error) {
     throw new Error(
       `Kan wrangler.jsonc niet lezen: ${ts.flattenDiagnosticMessageText(parsed.error.messageText, "\n")}`,
@@ -270,20 +214,11 @@ async function readWranglerConfig() {
   return parsed.config;
 }
 
-function configuredWidgets(config, siteKey) {
-  const variants = config.vars?.SITES?.[siteKey]?.variants ?? {};
-  const widgets = new Set(Object.keys(variants));
-  if (config.vars?.NEWSLETTERS?.[siteKey]) widgets.add("newsletter");
-  if (widgets.delete("websiteVanHetJaar")) {
-    widgets.add("website-van-het-jaar");
-  }
-  return widgets;
-}
-
 function sitesFromConfig(config) {
   if (!Array.isArray(config.routes)) {
     throw new Error("wrangler.jsonc bevat geen routes-array.");
   }
+  const { SITES = {}, NEWSLETTERS } = config.vars ?? {};
 
   return config.routes.map((route) => {
     const hostname = route.pattern?.replace(/\/\*$/, "");
@@ -291,39 +226,43 @@ function sitesFromConfig(config) {
     if (!hostname || !zoneName) {
       throw new Error("Elke route moet pattern en zone_name bevatten.");
     }
-    const siteKey = hostname.replace(/^www\./, "").toLowerCase();
+    const site = lookupSite(SITES, hostname, NEWSLETTERS);
+    if (!site) throw new Error(`Geen vars.SITES-entry voor route ${hostname}.`);
     return {
       hostname,
-      siteKey,
+      name: site.name,
       zoneName,
-      configuredWidgets: configuredWidgets(config, siteKey),
+      configuredWidgets: new Set(Object.keys(site.variants)),
     };
   });
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function fetchJson(url, options, attempts = 3) {
-  let lastError;
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+  for (let attempt = 1; ; attempt += 1) {
+    let response;
     try {
-      const response = await fetch(url, options);
-      const body = await response.json().catch(() => undefined);
-      if (!response.ok) {
-        const detail = body?.errors?.map((error) => error.message).join("; ");
-        const error = new Error(
-          `Cloudflare gaf HTTP ${response.status}${detail ? `: ${detail}` : ""}`,
-        );
-        error.retryable = response.status === 429 || response.status >= 500;
-        throw error;
-      } else {
-        return body;
-      }
+      response = await fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
     } catch (error) {
-      lastError = error;
-      if (error?.retryable === false || attempt === attempts) break;
+      if (attempt === attempts) throw error;
+      await sleep(500 * 2 ** (attempt - 1));
+      continue;
     }
-    await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** (attempt - 1)));
+    const body = await response.json().catch(() => undefined);
+    if (response.ok) return body;
+    if (attempt < attempts && (response.status === 429 || response.status >= 500)) {
+      await sleep(500 * 2 ** (attempt - 1));
+      continue;
+    }
+    const detail = body?.errors?.map((error) => error.message).join("; ");
+    throw new Error(
+      `Cloudflare gaf HTTP ${response.status}${detail ? `: ${detail}` : ""}`,
+    );
   }
-  throw lastError;
 }
 
 function authorizationHeaders(token) {
@@ -334,7 +273,7 @@ function authorizationHeaders(token) {
 }
 
 async function findZone(zoneName, token) {
-  const query = new URLSearchParams({ name: zoneName, match: "all" });
+  const query = new URLSearchParams({ name: zoneName });
   const body = await fetchJson(`${API_BASE_URL}/zones?${query}`, {
     headers: authorizationHeaders(token),
   });
@@ -354,7 +293,7 @@ async function graphql(query, variables, token) {
   const body = await fetchJson(GRAPHQL_URL, {
     method: "POST",
     headers: authorizationHeaders(token),
-    body: JSON.stringify({ query: query.replace(/\s+/g, " ").trim(), variables }),
+    body: JSON.stringify({ query, variables }),
   });
   if (body?.errors?.length) {
     throw new Error(body.errors.map((error) => error.message).join("; "));
@@ -397,11 +336,8 @@ function assertPeriodAvailable(period, settings, zoneName, includeBots) {
 }
 
 function createChunks(start, end, maxDurationSeconds) {
-  const maximumSeconds = Number(maxDurationSeconds);
-  const chunkMilliseconds = Math.min(
-    DEFAULT_CHUNK_SECONDS,
-    maximumSeconds,
-  ) * 1000;
+  const chunkMilliseconds =
+    Math.min(DEFAULT_CHUNK_SECONDS, Number(maxDurationSeconds)) * 1000;
   if (!Number.isFinite(chunkMilliseconds) || chunkMilliseconds <= 0) {
     throw new Error("Cloudflare rapporteert een ongeldige maximale queryduur.");
   }
@@ -449,29 +385,23 @@ async function querySite(site, period, token, includeBots) {
   const zone = await findZone(site.zoneName, token);
   const settings = await datasetSettings(zone.id, token);
   assertPeriodAvailable(period, settings, site.zoneName, includeBots);
-  const chunks = createChunks(period.start, period.end, settings.maxDuration);
-  const totals = emptyTotals();
 
-  for (const [start, end] of chunks) {
-    const filters = [
-      { datetime_geq: start.toISOString(), datetime_lt: end.toISOString() },
-      { requestSource: "eyeball" },
-      { clientRequestHTTPHost: site.hostname },
-      {
-        OR: TRACKED_REQUESTS.map((tracked) => ({
-          clientRequestPath: tracked.path,
-        })),
-      },
-    ];
-    if (!includeBots) {
-      filters.push({ botManagementDecision: "likely_human" });
-    }
-    const filter = { AND: filters };
-    const data = await graphql(
-      REPORT_QUERY,
-      { zoneTag: zone.id, filter },
-      token,
-    );
+  const baseFilters = [
+    { requestSource: "eyeball" },
+    { clientRequestHTTPHost: site.hostname },
+    { OR: TRACKED_REQUESTS.map((tracked) => ({ clientRequestPath: tracked.path })) },
+  ];
+  if (!includeBots) baseFilters.push({ botManagementDecision: "likely_human" });
+
+  const totals = emptyTotals();
+  for (const [start, end] of createChunks(period.start, period.end, settings.maxDuration)) {
+    const filter = {
+      AND: [
+        { datetime_geq: start.toISOString(), datetime_lt: end.toISOString() },
+        ...baseFilters,
+      ],
+    };
+    const data = await graphql(REPORT_QUERY, { zoneTag: zone.id, filter }, token);
     const zones = data?.viewer?.zones;
     if (zones?.length !== 1) {
       throw new Error(`Geen analyticsresultaat voor ${site.hostname}.`);
@@ -485,7 +415,7 @@ async function querySite(site, period, token, includeBots) {
     )
     .map(([widget, total]) => ({
       periode: period.label,
-      site: site.siteKey,
+      site: site.name,
       widget,
       gebeurtenis: total.event,
       aantal: Math.round(total.count),
@@ -499,14 +429,7 @@ function escapeCsv(value) {
 }
 
 function toCsv(rows) {
-  const columns = [
-    "periode",
-    "site",
-    "widget",
-    "gebeurtenis",
-    "aantal",
-    "meetwijze",
-  ];
+  const columns = ["periode", "site", "widget", "gebeurtenis", "aantal", "meetwijze"];
   return [
     columns.join(","),
     ...rows.map((row) => columns.map((column) => escapeCsv(row[column])).join(",")),
@@ -523,8 +446,7 @@ async function writeCsv(csvPath, rows) {
 async function main() {
   const options = parseArguments(process.argv.slice(2));
   const period = selectPeriod(options);
-  const config = await readWranglerConfig();
-  const sites = sitesFromConfig(config);
+  const sites = sitesFromConfig(await readWranglerConfig());
 
   console.log(
     `Rapportperiode: ${period.label} (UTC${period.complete ? "" : `; gegevens t/m ${period.end.toISOString()}`})`,
@@ -535,7 +457,7 @@ async function main() {
 
   if (options.dryRun) {
     console.table(sites.map((site) => ({
-      site: site.siteKey,
+      site: site.name,
       hostname: site.hostname,
       zone: site.zoneName,
       widgets: [...site.configuredWidgets].join(", "),
@@ -548,15 +470,11 @@ async function main() {
     throw new Error("CLOUDFLARE_API_TOKEN is niet ingesteld.");
   }
 
-  const rows = [];
-  for (const site of sites) {
-    console.error(`Cloudflare-analytics ophalen voor ${site.hostname}…`);
-    rows.push(...await querySite(site, period, token, options.includeBots));
-  }
+  console.error(`Cloudflare-analytics ophalen voor ${sites.length} sites...`);
+  const rows = (await Promise.all(
+    sites.map((site) => querySite(site, period, token, options.includeBots)),
+  )).flat();
 
-  rows.sort((left, right) =>
-    left.site.localeCompare(right.site) || left.widget.localeCompare(right.widget)
-  );
   console.table(rows);
   if (options.csvPath) await writeCsv(options.csvPath, rows);
 

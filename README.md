@@ -209,7 +209,8 @@ Stel `CLOUDFLARE_API_TOKEN` in met deze alleen-lezen rechten:
 - `Zone / Zone / Read` om de zone-ID's uit de `zone_name`-waarden op te zoeken;
 - toegang tot alle zones die onder `routes` in `wrangler.jsonc` staan.
 
-Het script gebruikt `wrangler.jsonc` als bron voor sites, hostnames en widgets.
+Het script gebruikt `wrangler.jsonc` als bron voor sites, hostnames en widgets
+en importeert de klikpaden uit `src/sites.ts`, zodat beide niet uit elkaar lopen.
 Het vraagt de data in korte perioden op, telt alleen eindgebruikersrequests en
 stopt als een deel van de maand buiten Cloudflares retentie valt. Een `302` op
 een klikpad telt als klik; een `200` op de nieuwsbrief-POST telt als
