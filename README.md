@@ -179,6 +179,45 @@ hierboven) en `clientRequestHTTPHost` op de site. Let op: deze dataset is adapti
 en heeft beperkte retentie; voor exacte, langdurige tellingen is Workers
 Analytics Engine of Logpush nauwkeuriger.
 
+### Maandrapport
+
+`scripts/monthly-report.mjs` vraagt de interne redirectpaden en succesvolle
+nieuwsbrief-POST's per site op. Zonder argument rapporteert het script de vorige
+UTC-kalendermaand; geef `JJJJ-MM` mee voor een andere maand:
+
+```bash
+npm run report:monthly
+npm run report:monthly -- 2026-08
+npm run report:monthly -- --last-week
+npm run report:monthly -- --from 2026-08-01 --to 2026-08-15
+npm run report:monthly -- --last-week --include-bots
+npm run report:monthly -- 2026-08 --csv reports/2026-08.csv
+```
+
+`--last-week` rapporteert de vorige volledige maandag tot en met zondag.
+`--from` en `--to` accepteren datums in `JJJJ-MM-DD`; beide grensdatums worden
+meegenomen. Alle perioden gebruiken UTC.
+
+Standaard telt het rapport alleen requests die Cloudflare als `likely_human`
+classificeert. Daarmee blijven verified bots en waarschijnlijk geautomatiseerd
+verkeer buiten de cijfers. Gebruik `--include-bots` om de botfilter voor een
+controlemeting uit te schakelen.
+
+Stel `CLOUDFLARE_API_TOKEN` in met deze alleen-lezen rechten:
+
+- `Account / Account Analytics / Read` voor de GraphQL Analytics API;
+- `Zone / Zone / Read` om de zone-ID's uit de `zone_name`-waarden op te zoeken;
+- toegang tot alle zones die onder `routes` in `wrangler.jsonc` staan.
+
+Het script gebruikt `wrangler.jsonc` als bron voor sites, hostnames en widgets.
+Het vraagt de data in korte perioden op, telt alleen eindgebruikersrequests en
+stopt als een deel van de maand buiten Cloudflares retentie valt. Een `302` op
+een klikpad telt als klik; een `200` op de nieuwsbrief-POST telt als
+inschrijving. De bestaande honeypot geeft bots bewust ook een `200`, zodat die
+antwoorden niet van echte inschrijvingen te onderscheiden zijn in HTTP
+Analytics. Gebruik `--dry-run` om zonder token de geselecteerde sites en widgets
+te controleren.
+
 ## Lokaal draaien
 
 ```bash
